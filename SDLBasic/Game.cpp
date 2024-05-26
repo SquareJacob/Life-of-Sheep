@@ -20,7 +20,7 @@ Game::Game(const char* title, bool fullscreen) {
 		renderer = SDL_CreateRenderer(window, -1, 0);
 		if (renderer) {
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			sheep = new GameObject("sheep1.png", renderer, 255);
+			sheep = new GameObject("assets/sheep1.png", renderer, 255);
 		}
 		else {
 			std::cout << SDL_GetError() << std::endl;
