@@ -27,6 +27,12 @@
     <ClCompile Include="GameObject.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="Sheep.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="Sword.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -38,5 +44,19 @@
     <ClInclude Include="GameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Sheep.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sword.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\sheep1.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\sword.png">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
 </Project>

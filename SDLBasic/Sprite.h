@@ -5,6 +5,9 @@
 class Sprite
 {
 public:
+	//This class is mostly used in other classes, specifically GameObject
+	//file: path to get sprite from
+	//renderer: what sprite will be rendererd to
 	Sprite(const char* file, SDL_Renderer* renderer);
 	~Sprite();
 	//(x,y) specifies top left corner

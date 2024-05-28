@@ -137,12 +137,20 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Sheep.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="Sword.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Sheep.h" />
     <ClInclude Include="Sprite.h" />
+    <ClInclude Include="Sword.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="assets\sheep1.png" />
+    <Image Include="assets\sword.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

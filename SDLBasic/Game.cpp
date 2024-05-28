@@ -1,26 +1,42 @@
 #include "Game.h"
 #include "GameObject.h"
+#include "Sheep.h"
+#include "Sword.h"
+#include <string.h>
 
-GameObject* sheep;
+Sheep* sheep;
+GameObject* titleScreen;
+Sword* sword;
 
 Game::Game(const char* title, bool fullscreen) {
+	room = "Menu";
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
+		std::cout << "Subsystem initialized..." << std::endl;
+		//Get current display size
 		SDL_DisplayMode DM;
 		if (SDL_GetDesktopDisplayMode(0, &DM) != 0) {
 			std::cout << SDL_GetError() << std::endl;
 		}
 		width = DM.w;
 		height = DM.h;
-		std::cout << "Subsystem initialized..." << std::endl;
+		//Create window
 		window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
 		if (window == NULL) {
 			std::cout << SDL_GetError() << std::endl;
 		}
 		//SDL_SetWindowResizable(window, SDL_TRUE);
+		//Create renderer and game objects
 		renderer = SDL_CreateRenderer(window, -1, 0);
 		if (renderer) {
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-			sheep = new GameObject("assets/sheep1.png", renderer, 255);
+
+			sheep = new Sheep("assets/sheep1.png", renderer, 100, 0.1, 0.1);
+
+			titleScreen = new GameObject("assets/title.png", renderer, 250);
+			titleScreen->x = width / 2;
+			titleScreen->y = height / 2;
+
+			sword = new Sword("assets/sword.png", renderer, 50, 0.3, 500, sheep);
 		}
 		else {
 			std::cout << SDL_GetError() << std::endl;
@@ -41,32 +57,64 @@ void Game::handleEvents() {
 			isRunning = false;
 			break;
 		case SDL_KEYDOWN:
-			keys.insert(std::string(SDL_GetKeyName(event.key.keysym.sym)));
+			//Only flip is Space is JUST NOW being pressed down
+			if (!keys.contains("Space") && strcmp(SDL_GetKeyName(event.key.keysym.sym), "Space") == 0) {
+				if (room != "Menu") {
+					sheep->flip = 1 - sheep->flip;
+				}
+			}
+			keys.insert(std::string(SDL_GetKeyName(event.key.keysym.sym))); //add keydown to keys set
 			break;
 		case SDL_KEYUP:
-			keys.erase(std::string(SDL_GetKeyName(event.key.keysym.sym)));
-			break;
-		case SDL_WINDOWEVENT_RESIZED:
-			std::cout << "display event" << std::endl;
-		default:
+			keys.erase(std::string(SDL_GetKeyName(event.key.keysym.sym))); //remove keyup from keys set
 			break;
 		}
 	}
-	/**
-	for (std::string i : keys) {
-		std::cout << i << ' ';
-	}
-	std::cout <<keys.size() << '\n';
-	**/
 }
 
 void Game::update(int frame) {
-	sheep->angle += frame / 10;
+	if (room != "Menu") {
+		//Sheep update
+		if (keys.contains("W")) {
+			sheep->move(frame);
+		}
+		if (keys.contains("A")) {
+			sheep->rotate(frame);
+		}
+		if (keys.contains("S")) {
+			sheep->move(-frame);
+		}
+		if (keys.contains("D")) {
+			sheep->rotate(-frame);
+		}
+
+		//Sword update
+		sword->sheepify();
+		if (!sword->out()) {
+			if (keys.contains("O")) {
+				sword->beginPoke();
+			} else if (keys.contains("P")) {
+				sword->beginSwing();
+			}
+		}
+		sword->swing(frame);
+	}
+	if (room == "Menu") {
+		if (keys.contains("Return")) {
+			room = "Level1";
+		}
+	}
 }
 
 void Game::render() {
 	SDL_RenderClear(renderer);
-	sheep->render();
+	if (room != "Menu") {
+		sheep->render();
+		sword->renderSwing();
+	}
+	if (room == "Menu") {
+		titleScreen->render();
+	}
 	SDL_RenderPresent(renderer);
 }
 
