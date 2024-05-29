@@ -23,6 +23,10 @@ public:
 	SDL_Renderer* getRenderer();
 	int getWidth();
 	int getHeight();
+	//sends thee to the prepare room
+	void prepare();
+	//sends thee to the next level
+	void levelup();
 private:
 	bool isRunning;
 	SDL_Window* window;
@@ -30,7 +34,9 @@ private:
 	int width;  //width of window
 	int height; //height of window
 	SDL_Event event;
-	std::set<std::string> keys; //set of keys pressed
-	std::string room; //Menu, Level1
+	std::set<std::string> keys; //set of keys currently
+	std::set<std::string> currentKeys;
+	std::string room; //Menu, Prepare, Level[1-10]
+	int level; //current level
 };
 

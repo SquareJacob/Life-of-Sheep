@@ -5,12 +5,20 @@
 #include <string.h>
 
 Sheep* sheep;
-GameObject* titleScreen;
 Sword* sword;
+
+SDL_Color black = { 0, 0, 0 };
+SDL_Color orange = { 255, 165, 0 };
+SDL_Color green = { 0, 255, 0 };
+SDL_Color blue = { 0, 0, 255 };
+
+GameObject* progressText;
+GameObject* titleText;
 
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
-	if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
+	level = 0;
+	if (SDL_Init(SDL_INIT_EVERYTHING) == 0 && TTF_Init() == 0) {
 		std::cout << "Subsystem initialized..." << std::endl;
 		//Get current display size
 		SDL_DisplayMode DM;
@@ -32,11 +40,15 @@ Game::Game(const char* title, bool fullscreen) {
 
 			sheep = new Sheep("assets/sheep1.png", renderer, 100, 0.1, 0.1);
 
-			titleScreen = new GameObject("assets/title.png", renderer, 250);
-			titleScreen->x = width / 2;
-			titleScreen->y = height / 2;
+			sword = new Sword("assets/sword.png", renderer, 50, 0.3, 250, sheep);
 
-			sword = new Sword("assets/sword.png", renderer, 50, 0.3, 500, sheep);
+			progressText = new GameObject("Press Enter to progress", "BlackRunters", 250, black, orange, 1000, renderer, 250);
+			progressText->x = width - progressText->width / 2;
+			progressText->y = height - progressText->height / 2;
+
+			titleText = new GameObject("Life of Sheep", "BlackRunters", 250, blue, green, 3000, renderer, 150);
+			titleText->x = width / 2;
+			titleText->y = height / 2;
 		}
 		else {
 			std::cout << SDL_GetError() << std::endl;
@@ -51,17 +63,17 @@ Game::Game(const char* title, bool fullscreen) {
 Game::~Game() {}
 
 void Game::handleEvents() {
+	for (std::string i : keys) {
+		currentKeys.erase(i);
+	}
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 		case SDL_QUIT:
 			isRunning = false;
 			break;
 		case SDL_KEYDOWN:
-			//Only flip is Space is JUST NOW being pressed down
-			if (!keys.contains("Space") && strcmp(SDL_GetKeyName(event.key.keysym.sym), "Space") == 0) {
-				if (room != "Menu") {
-					sheep->flip = 1 - sheep->flip;
-				}
+			if (!keys.contains(std::string(SDL_GetKeyName(event.key.keysym.sym)))) {
+				currentKeys.insert(std::string(SDL_GetKeyName(event.key.keysym.sym)));
 			}
 			keys.insert(std::string(SDL_GetKeyName(event.key.keysym.sym))); //add keydown to keys set
 			break;
@@ -73,7 +85,7 @@ void Game::handleEvents() {
 }
 
 void Game::update(int frame) {
-	if (room != "Menu") {
+	if (room != "Menu" && room != "Prepare") {
 		//Sheep update
 		if (keys.contains("W")) {
 			sheep->move(frame);
@@ -86,6 +98,9 @@ void Game::update(int frame) {
 		}
 		if (keys.contains("D")) {
 			sheep->rotate(-frame);
+		}
+		if (currentKeys.contains("Space")) {
+			sheep->flip = 1 - sheep->flip;
 		}
 
 		//Sword update
@@ -100,8 +115,12 @@ void Game::update(int frame) {
 		sword->swing(frame);
 	}
 	if (room == "Menu") {
-		if (keys.contains("Return")) {
-			room = "Level1";
+		if (currentKeys.contains("Return")) {
+			prepare();
+		}
+	} else if (room == "Prepare") {
+		if (currentKeys.contains("Return")) {
+			levelup();
 		}
 	}
 }
@@ -110,10 +129,15 @@ void Game::render() {
 	SDL_RenderClear(renderer);
 	if (room != "Menu") {
 		sheep->render();
-		sword->renderSwing();
+		if (room != "Prepare") {
+			sword->renderSwing();
+		}
 	}
 	if (room == "Menu") {
-		titleScreen->render();
+		progressText->render();
+		titleText->render();
+	} else if (room == "Prepare") {
+		progressText->render();
 	}
 	SDL_RenderPresent(renderer);
 }
@@ -139,6 +163,25 @@ int Game::getWidth() {
 
 int Game::getHeight() {
 	return height;
+}
+
+void Game::prepare() {
+	room = "Prepare";
+	sheep->x = 2 * sheep->width + 100;
+	sheep->y = 2 * sheep->height + 100;
+	sheep->width *= 4;
+	sheep->height *= 4;
+	sheep->flip = 0;
+	sheep->angle = 0;
+}
+
+void Game::levelup() {
+	level++;
+	room = "level" + level;
+	sheep->width /= 4;
+	sheep->height /= 4;
+	sheep->x = sheep->width / 2;
+	sheep->y = sheep->height / 2;
 }
 
 

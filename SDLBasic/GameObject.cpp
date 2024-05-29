@@ -1,9 +1,8 @@
 #include "GameObject.h"
 #include "Sprite.h"
 
-GameObject::GameObject(const char* spriteFile, SDL_Renderer* renderer, uint16_t height) {
+void GameObject::objectize(SDL_Renderer* renderer, uint16_t height) {
 	this->renderer = renderer;
-	sprite = new Sprite(spriteFile, renderer);
 	angle = 0.0;
 	radians = 0.0;
 	flip = 0;
@@ -11,6 +10,16 @@ GameObject::GameObject(const char* spriteFile, SDL_Renderer* renderer, uint16_t 
 	this->height = height;
 	x = width * 0.5;
 	y = height * 0.5;
+}
+
+GameObject::GameObject(const char* spriteFile, SDL_Renderer* renderer, uint16_t height) {
+	sprite = new Sprite(spriteFile, renderer);
+	objectize(renderer, height);
+}
+
+GameObject::GameObject(const char* text, const char* font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height) {
+	sprite = new Sprite(text, font, size, fg, bg, wrapLength, renderer);
+	objectize(renderer, height);
 }
 
 GameObject::~GameObject() {}

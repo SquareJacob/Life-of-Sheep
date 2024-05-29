@@ -1,20 +1,38 @@
 #include "Sprite.h"
 
-Sprite::Sprite(const char* file, SDL_Renderer* renderer) {
-	SDL_Surface* tmpSurface = IMG_Load(file);
-	if (tmpSurface == NULL) {
+
+void Sprite::texturize(SDL_Surface* surface, SDL_Renderer* renderer) {
+	if (surface == NULL) {
 		std::cout << SDL_GetError() << std::endl;
 		porportion = 1.0;
-		texture = NULL;
 		return;
 	}
-	porportion = (float)tmpSurface->w / (float)tmpSurface->h;
-	texture = SDL_CreateTextureFromSurface(renderer, tmpSurface);
-	SDL_FreeSurface(tmpSurface);
+	porportion = (float)surface->w / (float)surface->h;
+	texture = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_FreeSurface(surface);
 	if (texture == NULL) {
 		std::cout << SDL_GetError() << std::endl;
 		return;
 	}
+}
+
+Sprite::Sprite(const char* file, SDL_Renderer* renderer) {
+	SDL_Surface* tmpSurface = IMG_Load(file);
+	texturize(tmpSurface, renderer);
+}
+
+Sprite::Sprite(const char* text, const char* font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer) {
+	char path[100];
+	sprintf_s(path, sizeof(path), "assets/%s.otf", font);
+	TTF_Font* Font = TTF_OpenFont(path, size);
+	if (Font == NULL) {
+		std::cout << SDL_GetError() << std::endl;
+		porportion = 1.0;
+		return;
+	}
+	SDL_Surface* tmpSurface = TTF_RenderText_LCD_Wrapped(Font, text, fg, bg, wrapLength);
+	TTF_CloseFont(Font);
+	texturize(tmpSurface, renderer);
 }
 
 Sprite::~Sprite() {}

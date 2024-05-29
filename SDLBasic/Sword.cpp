@@ -16,6 +16,7 @@ void Sword::sheepify() {
 	angle = sheep->angle;
 	x = sheep->x;
 	y = sheep->y;
+	flip = 2 * sheep->flip;
 }
 
 void Sword::swing(int frame) {
@@ -33,8 +34,8 @@ void Sword::swing(int frame) {
 			poke = 0;
 		}
 	}
-	x -= (float) sheepWidth * sin(setRadians());
-	y -= (float) sheepWidth * cos(radians);
+	x -= (float) sheepWidth * sin(setRadians()) * (1 - flip);
+	y -= (float) sheepWidth * cos(radians) * (1 - flip);
 }
 
 bool Sword::out() {
