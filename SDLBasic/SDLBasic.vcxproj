@@ -134,6 +134,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Bull.cpp" />
+    <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="main.cpp" />
@@ -142,6 +144,8 @@
     <ClCompile Include="Sword.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bull.h" />
+    <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Sheep.h" />
@@ -149,6 +153,7 @@
     <ClInclude Include="Sword.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="assets\bull.png" />
     <Image Include="assets\sheep1.png" />
     <Image Include="assets\sword.png" />
   </ItemGroup>

@@ -1,9 +1,11 @@
 #include "Sword.h"
 
-Sword::Sword(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, double speed, int pokeTime, Sheep* sheep) :
+Sword::Sword(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, double speed, int pokeTime, Sheep* sheep, int pDmg, int sDmg) :
 	GameObject(spriteFile, renderer, height) {
 	this->speed = speed;
 	this->pokeTime = pokeTime;
+	this->pDmg = pDmg;
+	this->sDmg = sDmg;
 	this->sheepWidth = sheep->width / 2;
 	this->sheep = sheep;
 	poke = 0;
@@ -19,16 +21,21 @@ void Sword::sheepify() {
 	flip = 2 * sheep->flip;
 }
 
-void Sword::swing(int frame) {
+bool Sword::swing(int frame) {
+	bool result = false;
 	if (swordAngle > 0) {
 		swordAngle -= (float) frame * speed;
 		if (swordAngle < 0) {
 			swordAngle = 0;
 		}
 		angle += swordAngle + 180;
+		result = true;
 	}
 	if (poke > 0) {
 		angle += 270;
+		if (poking()) {
+			result = true;
+		}
 		poke -= frame;
 		if (poke < 0) {
 			poke = 0;
@@ -36,6 +43,7 @@ void Sword::swing(int frame) {
 	}
 	x -= (float) sheepWidth * sin(setRadians()) * (1 - flip);
 	y -= (float) sheepWidth * cos(radians) * (1 - flip);
+	return result;
 }
 
 bool Sword::out() {
@@ -51,7 +59,35 @@ void Sword::beginSwing() {
 }
 
 void Sword::renderSwing(){
-	if (swordAngle > 0 || poke > pokeTime * 4 / 5) {
+	if (poking() || swinging()) {
 		render();
+	}
+}
+
+void Sword::updatePokeTime(int amount) {
+	pokeTime += amount;
+}
+
+void Sword::updateSwingDmg(int amount) {
+	sDmg += amount;
+}
+
+bool Sword::poking() {
+	return poke > pokeTime * 4 / 5;
+}
+
+bool Sword::swinging() {
+	return swordAngle > 0;
+}
+
+int Sword::damage() {
+	if (poking()) {
+		return pDmg;
+	}
+	else if (swinging()) {
+		return sDmg;
+	}
+	else {
+		return 0;
 	}
 }

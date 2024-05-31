@@ -13,22 +13,29 @@ public:
     //speed: porpotional to speed of swing
     //pokeTime: time between pokes in ms
     //sheep: sheep :)
-    Sword(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, double speed, int pokeTime, Sheep* sheep);
+    Sword(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, double speed, int pokeTime, Sheep* sheep, int pDmg, int sDmg);
     //Set position and angle relative to sheep
     void sheepify();
     //progress current swing or poke, and move sword based on swordAngle
-    void swing(int frame);
+    bool swing(int frame);
     //whether or not sword is currently midaction or on cooldown
     bool out();
     void beginPoke();
     void beginSwing();
     //renders sword swing if mid-action
     void renderSwing();
+    //updates linearly
+    void updatePokeTime(int amount);
+    //updates linearly
+    void updateSwingDmg(int amount);
+    bool poking();
+    bool swinging();
+    int damage();
 private:
     double speed; //porpotional to speed of swing
     double sAngle; //sheep Angle
     double swordAngle; //sword Angle relative to sheep
-    int poke, pokeTime;
+    int poke, pokeTime, pDmg, sDmg;
     int sheepWidth; //actually sheepWidth/2; useful constant
     Sheep* sheep; //sheep :)
 };

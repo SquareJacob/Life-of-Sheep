@@ -27,9 +27,9 @@ public:
 	//width/height
 	float getPorportion();
 	void texturize(SDL_Surface* surface, SDL_Renderer* renderer);
+	SDL_Texture* texture;
 private:
 	float porportion; //width/height
-	SDL_Texture* texture;
 	SDL_Rect desR;
 };
 

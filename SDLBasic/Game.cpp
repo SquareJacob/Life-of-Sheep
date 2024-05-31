@@ -2,10 +2,16 @@
 #include "GameObject.h"
 #include "Sheep.h"
 #include "Sword.h"
-#include <string.h>
+#include "Bull.h"
+#include <string>
 
 Sheep* sheep;
+const int sheepBaseHealth = 300;
+
 Sword* sword;
+const int swordBaseSwingDamage = 30;
+const int swordBasePokeTime = 260;
+bool swordOut = false;
 
 SDL_Color black = { 0, 0, 0 };
 SDL_Color orange = { 255, 165, 0 };
@@ -14,6 +20,9 @@ SDL_Color blue = { 0, 0, 255 };
 
 GameObject* progressText;
 GameObject* titleText;
+GameObject* upgradeText;
+
+Bull* bull;
 
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
@@ -38,9 +47,9 @@ Game::Game(const char* title, bool fullscreen) {
 		if (renderer) {
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-			sheep = new Sheep("assets/sheep1.png", renderer, 100, 0.1, 0.1);
+			sheep = new Sheep("assets/sheep1.png", renderer, 100, 0.1, 0.1, sheepBaseHealth);
 
-			sword = new Sword("assets/sword.png", renderer, 50, 0.3, 250, sheep);
+			sword = new Sword("assets/sword.png", renderer, 50, 0.3, swordBasePokeTime, sheep, 10, swordBaseSwingDamage);
 
 			progressText = new GameObject("Press Enter to progress", "BlackRunters", 250, black, orange, 1000, renderer, 250);
 			progressText->x = width - progressText->width / 2;
@@ -49,6 +58,13 @@ Game::Game(const char* title, bool fullscreen) {
 			titleText = new GameObject("Life of Sheep", "BlackRunters", 250, blue, green, 3000, renderer, 150);
 			titleText->x = width / 2;
 			titleText->y = height / 2;
+
+			upgradeText = new GameObject("Press N to upgrade poke speed, M to upgrade swing damage. Progress upon upgrading", "BlackRunters", 250, black, orange, 2000, renderer, 250);
+			upgradeText->y = height - upgradeText->height / 2;
+
+			bull = new Bull("assets/bull.png", renderer, 100, 500, sword, sheep);
+			bull->x = width - bull->width / 2;
+			bull->y = height - bull->height / 2;
 		}
 		else {
 			std::cout << SDL_GetError() << std::endl;
@@ -112,7 +128,7 @@ void Game::update(int frame) {
 				sword->beginSwing();
 			}
 		}
-		sword->swing(frame);
+		swordOut = sword->swing(frame);
 	}
 	if (room == "Menu") {
 		if (currentKeys.contains("Return")) {
@@ -122,12 +138,27 @@ void Game::update(int frame) {
 		if (currentKeys.contains("Return")) {
 			levelup();
 		}
+		if (currentKeys.contains("N")) {
+			sword->updatePokeTime(-swordBasePokeTime / 13);
+			levelup();
+		}
+		else if (currentKeys.contains("M")) {
+			sword->updateSwingDmg(swordBaseSwingDamage / 6);
+			levelup();
+		}
+	}
+	if (room == "Level1") {
+		bull->update(frame);
+		bull->damaged(swordOut);
 	}
 }
 
+
 void Game::render() {
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderClear(renderer);
 	if (room != "Menu") {
+		std::vector<double> corners(8);
 		sheep->render();
 		if (room != "Prepare") {
 			sword->renderSwing();
@@ -138,6 +169,9 @@ void Game::render() {
 		titleText->render();
 	} else if (room == "Prepare") {
 		progressText->render();
+		upgradeText->render();
+	} else if (room == "Level1") {
+		bull->render();
 	}
 	SDL_RenderPresent(renderer);
 }
@@ -177,7 +211,8 @@ void Game::prepare() {
 
 void Game::levelup() {
 	level++;
-	room = "level" + level;
+	room = "Level";
+	room = room + std::to_string(level);
 	sheep->width /= 4;
 	sheep->height /= 4;
 	sheep->x = sheep->width / 2;
