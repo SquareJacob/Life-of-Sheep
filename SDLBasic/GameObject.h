@@ -22,7 +22,7 @@ public:
 	//wrapLength: length to wrap text at
 	//renderer: what sprite will be rendererd to
 	//height: height of object; width will be based on porportions of original sprite
-	GameObject(const char* text, const char* font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height);
+	GameObject(std::string text, std::string font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height);
 	~GameObject();
 	//renders the object, centered at (x,y)
 	void render();

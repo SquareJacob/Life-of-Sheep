@@ -21,18 +21,21 @@ Sprite::Sprite(const char* file, SDL_Renderer* renderer) {
 	texturize(tmpSurface, renderer);
 }
 
-Sprite::Sprite(const char* text, const char* font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer) {
-	char path[100];
-	sprintf_s(path, sizeof(path), "assets/%s.otf", font);
-	TTF_Font* Font = TTF_OpenFont(path, size);
+void Sprite::textualize(std::string text, std::string path, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer) {
+	TTF_Font* Font = TTF_OpenFont(path.c_str(), size);
 	if (Font == NULL) {
 		std::cout << SDL_GetError() << std::endl;
 		porportion = 1.0;
 		return;
 	}
-	SDL_Surface* tmpSurface = TTF_RenderText_LCD_Wrapped(Font, text, fg, bg, wrapLength);
+	SDL_Surface* tmpSurface = TTF_RenderText_LCD_Wrapped(Font, text.c_str(), fg, bg, wrapLength);
 	TTF_CloseFont(Font);
 	texturize(tmpSurface, renderer);
+}
+
+Sprite::Sprite(std::string text, std::string font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer) {
+	std::string path = "assets/" + font + ".otf";
+	textualize(text, path, size, fg, bg, wrapLength, renderer);
 }
 
 Sprite::~Sprite() {}

@@ -18,7 +18,7 @@ public:
 	//bg: background color
 	//wrapLength: length to wrap text at
 	//renderer: what sprite will be rendererd to
-	Sprite(const char* text, const char* font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer);
+	Sprite(std::string text, std::string path, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer);
 	~Sprite();
 	//(x,y) specifies top left corner
 	//rotates counterclockwise in degrees
@@ -26,9 +26,10 @@ public:
 	void place(int x, int y, int width, int height, double angle, uint8_t flip, SDL_Renderer* renderer);
 	//width/height
 	float getPorportion();
-	void texturize(SDL_Surface* surface, SDL_Renderer* renderer);
+	void textualize(std::string text, std::string font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer);
 	SDL_Texture* texture;
 private:
+	void texturize(SDL_Surface* surface, SDL_Renderer* renderer);
 	float porportion; //width/height
 	SDL_Rect desR;
 };

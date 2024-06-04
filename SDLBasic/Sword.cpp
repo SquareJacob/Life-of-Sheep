@@ -41,8 +41,8 @@ bool Sword::swing(int frame) {
 			poke = 0;
 		}
 	}
-	x -= (float) sheepWidth * sin(setRadians()) * (1 - flip);
-	y -= (float) sheepWidth * cos(radians) * (1 - flip);
+	x -= (float) (sheepWidth + width / 2) * sin(setRadians()) * (1 - flip);
+	y -= (float) (sheepWidth + width / 2) * cos(radians) * (1 - flip);
 	return result;
 }
 

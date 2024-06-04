@@ -19,7 +19,7 @@ GameObject::GameObject(const char* spriteFile, SDL_Renderer* renderer, uint16_t 
 	objectize(renderer, height);
 }
 
-GameObject::GameObject(const char* text, const char* font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height) {
+GameObject::GameObject(std::string text, std::string font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height) {
 	sprite = new Sprite(text, font, size, fg, bg, wrapLength, renderer);
 	objectize(renderer, height);
 }
@@ -49,7 +49,7 @@ bool GameObject::shift(double vel) {
 	}
 	if (y < lowerY) {
 		y = lowerY;
-		result = 0;
+		result = true;
 	}
 	else if (y > upperY) {
 		y = upperY;
