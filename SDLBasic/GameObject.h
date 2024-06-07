@@ -5,10 +5,12 @@
 #include <vector>
 #define PI 3.14159265
 #define QPI PI/4.0 //Quarter of PI
-//Should be subclasses into specific objects unless using for text
+//Should be subclassed into specific objects
 class GameObject
 {
 public:
+	//destroys surface upon finish
+	GameObject(SDL_Surface* surface, SDL_Renderer* renderer, uint16_t height);
 	//Places object in topleft corner intially.
 	//spriteFile: path to get sprite from
 	//renderer: what GameObject will be rendererd to
@@ -33,7 +35,10 @@ public:
 	//Rotates object amount porportional to vel. ccw is positive. Sets radians
 	void tilt(double vel);
 	//setup local edge collision bounds
-	void bound();
+	void setBounds();
+	void setBounds(double edge);
+	//places sheep returned in bounds if needs, returns if sheep was moved
+	bool bound();
 	//put all corners into a vector; even is x, odd is y, goes in order of quadrant before rotation and flip
 	void cornerize(std::vector<double>& corners);
 	void renderHitBox(int r, int g, int b);
@@ -41,6 +46,7 @@ public:
 	bool collided(GameObject* object, bool talk = false);
 	int16_t width;
 	int16_t height;
+	int16_t cWidth, cHeight;
 	double x; //center xpos
 	double y; //center ypos
 	double angle; //degrees
@@ -48,9 +54,8 @@ public:
 	uint8_t flip; //0 = no flip, 1 = horizontal, 2 = vertical
 protected:
 	//prep function used in constructors
-	void objectize(SDL_Renderer* renderer, uint16_t height);
+	void objectize(uint16_t height);
 	Sprite* sprite;
-	SDL_Renderer* renderer;
 	int gameWidth = 0, gameHeight = 0;
 	int16_t lowerX, lowerY, upperX, upperY;
 private:

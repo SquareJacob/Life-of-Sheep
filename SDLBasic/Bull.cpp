@@ -1,7 +1,7 @@
 #include "Bull.h"
 
-Bull::Bull(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep) :
-	Enemy(spriteFile, renderer, height, health, sword, sheep) {
+Bull::Bull(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar) :
+	Enemy(spriteFile, renderer, height, health, sword, sheep, bar) {
 }
 
 Bull::~Bull() {}
@@ -27,8 +27,8 @@ void Bull::update(double frame) {
 		damage(5);
 	}
 	else if (ticker < TAU) { //wiggle
-		angle = cAngle + prepAngle * sin(ticker);
-		ticker += TAU * frame / chargeTime;
+		angle = cAngle + prepAngle * sin(5.0 * ticker);
+		ticker += TAU * frame / chargeTime / 5.0;
 		ticker = ticker > TAU ? 7 : ticker;
 		damage(10);
 	}
@@ -51,7 +51,14 @@ void Bull::update(double frame) {
 		damage(15);
 	}
 	else { //restart
-		ticker = -1;
+		ticker = -(float) health / (float) maxHealth;
 		damage(15);
 	}
+}
+
+void Bull::prepare() {
+	Enemy::prepare();
+	x = upperX;
+	y = upperY;
+	ticker = 0;
 }

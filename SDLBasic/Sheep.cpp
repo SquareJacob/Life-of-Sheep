@@ -1,12 +1,15 @@
 #include "Sheep.h"
 #include <string>
 
-Sheep::Sheep(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, double speed, double aSpeed, int health, TextArea* healthText) :
+Sheep::Sheep(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, double speed, double aSpeed, int health, Bar* bar) :
 	GameObject(spriteFile, renderer, height) {
 	this->speed = speed;
 	this->aSpeed = aSpeed;
 	this->health = health;
-	this->healthText = healthText;
+	this->bar = bar;
+	this->maxHealth = health;
+	cWidth *= 0.8;
+	cHeight *= 0.8;
 }
 
 void Sheep::move(double vel) {
@@ -21,7 +24,8 @@ bool Sheep::takeDmg(int dmg) {
 	if (immunity == 0) {
 		immunity = immunityFrames;
 		health -= dmg;
-		healthText->changeText(std::to_string(health));
+		health = health < 0 ? 0 : health;
+		bar->setValue(health);
 		return true;
 	}
 	return false;
@@ -30,4 +34,13 @@ bool Sheep::takeDmg(int dmg) {
 void Sheep::update(int frame) {
 	immunity -= frame;
 	immunity = immunity < 0 ? 0 : immunity;
+}
+
+void Sheep::prepare() {
+	width /= 4;
+	height /= 4;
+	x = lowerX;
+	y = lowerY;
+	health = maxHealth;
+	bar->setValue(health);
 }

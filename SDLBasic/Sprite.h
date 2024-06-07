@@ -7,6 +7,8 @@
 class Sprite
 {
 public:
+	//Destroys the surface upon finish
+	Sprite(SDL_Surface* surface, SDL_Renderer* renderer);
 	//Creates sprite from file.
 	//file: path to get sprite from
 	//renderer: what sprite will be rendererd to
@@ -23,13 +25,14 @@ public:
 	//(x,y) specifies top left corner
 	//rotates counterclockwise in degrees
 	//0 = no flip, 1 = horizontal, 2 = vertical
-	void place(int x, int y, int width, int height, double angle, uint8_t flip, SDL_Renderer* renderer);
+	void place(int x, int y, int width, int height, double angle, uint8_t flip);
 	//width/height
 	float getPorportion();
-	void textualize(std::string text, std::string font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer);
+	void textualize(std::string text, std::string font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength);
 	SDL_Texture* texture;
+	SDL_Renderer* renderer;
 private:
-	void texturize(SDL_Surface* surface, SDL_Renderer* renderer);
+	void texturize(SDL_Surface* surface);
 	float porportion; //width/height
 	SDL_Rect desR;
 };

@@ -14,7 +14,8 @@ TextArea::~TextArea() {}
 
 void TextArea::retext() {
 	SDL_DestroyTexture(sprite->texture);
-	sprite->textualize(text, font, size, fg, bg, wrapLength, renderer);
+	sprite->textualize(text, font, size, fg, bg, wrapLength);
+	width = sprite->getPorportion() * height;
 }
 
 void TextArea::changeText(std::string text) {

@@ -23,6 +23,8 @@ public:
 	SDL_Renderer* getRenderer();
 	int getWidth();
 	int getHeight();
+	//tries to update gold, without going negative, returns if successfully updated gold
+	bool updateGold(int amount);
 	//sends thee to the prepare room
 	void prepare();
 	//sends thee to the next level
@@ -33,6 +35,12 @@ private:
 	SDL_Renderer* renderer;
 	int width;  //width of window
 	int height; //height of window
+	//porpotion of width and height meant for battle
+	double edge = 0.95;
+	//x-coord of topleft corner of battle
+	double battleX;
+	//y-coord of topleft corner of battle
+	double battleY;
 	SDL_Event event;
 	std::set<std::string> keys; //set of keys currently
 	std::set<std::string> currentKeys;

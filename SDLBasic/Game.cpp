@@ -4,11 +4,13 @@
 #include "Sword.h"
 #include "Bull.h"
 #include "TextArea.h"
+#include "Bar.h"
 #include <SDL_mixer.h>
 #include <string>
 
 Sheep* sheep;
 const int sheepBaseHealth = 300;
+int gold = 0;
 
 Sword* sword;
 const int swordBaseSwingDamage = 30;
@@ -20,15 +22,20 @@ SDL_Color black = { 0, 0, 0 };
 SDL_Color orange = { 255, 165, 0 };
 SDL_Color green = { 0, 255, 0 };
 SDL_Color blue = { 0, 0, 255 };
+SDL_Color yellow = { 255, 255, 0 };
 
 TextArea* progressText;
 TextArea* titleText;
 TextArea* upgradeText;
-TextArea* healthText;
+TextArea* goldText;
 
 Bull* bull;
 
 Mix_Music* menuMusic;
+Mix_Music* bullMusic;
+
+Bar* sheepBar;
+Bar* enemyBar;
 
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
@@ -42,12 +49,15 @@ Game::Game(const char* title, bool fullscreen) {
 		}
 		width = DM.w;
 		height = DM.h;
+		battleX = (1 - edge) / 2.0 * width;
+		battleY = (1 - edge) / 2.0 * height;
 		//Create window
 		window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
 		if (window == NULL) {
 			std::cout << SDL_GetError() << std::endl;
 		}
 		menuMusic = Mix_LoadMUS("assets/a sheepish menu.ogg");
+		bullMusic = Mix_LoadMUS("assets/CHARGE!!.ogg");
 		Mix_PlayMusic(menuMusic, -1);
 		//SDL_SetWindowResizable(window, SDL_TRUE);
 		//Create renderer and game objects
@@ -63,18 +73,23 @@ Game::Game(const char* title, bool fullscreen) {
 			titleText->x = width / 2;
 			titleText->y = height / 2;
 
-			upgradeText = new TextArea("Press N to upgrade poke speed, M to upgrade swing damage. Progress upon upgrading", "BlackRunters", 250, black, orange, 2000, renderer, 250);
+			upgradeText = new TextArea("Press N to upgrade poke speed, M to upgrade swing damage, each costing 1 gold", "BlackRunters", 250, black, orange, 2000, renderer, 250);
 			upgradeText->y = height - upgradeText->height / 2;
 
-			healthText = new TextArea(std::to_string(sheepBaseHealth), "BlackRunters", 250, red, black, 1000, renderer, 100);
+			goldText = new TextArea("Gold :" + std::to_string(gold), "BlackRunters", 250, yellow, black, 10000, renderer, 100);
+			updateGold(0);
 
-			sheep = new Sheep("assets/sheep1.png", renderer, 100, 0.2, 0.1, sheepBaseHealth, healthText);
+			sheepBar = new Bar(sheepBaseHealth, sheepBaseHealth, green, red, 0, 0, height, true, renderer);
+
+			enemyBar = new Bar(1, 1, red, green, width - sheepBar->height, 0, height, true, renderer);
+
+			sheep = new Sheep("assets/sheep1.png", renderer, 100, 0.2, 0.1, sheepBaseHealth, sheepBar);
+			sheep->setBounds(edge);
 
 			sword = new Sword("assets/sword.png", renderer, 100, 0.3, swordBasePokeTime, sheep, 15, swordBaseSwingDamage);
 
-			bull = new Bull("assets/bull.png", renderer, 100, 500, sword, sheep);
-			bull->x = width - bull->width / 2;
-			bull->y = height - bull->height / 2;
+			bull = new Bull("assets/bull.png", renderer, 100, 5000, sword, sheep, enemyBar);
+			bull->setBounds(edge);
 
 		}
 		else {
@@ -115,18 +130,38 @@ void Game::update(int frame) {
 	if (room != "Menu" && room != "Prepare") {
 		//Sheep update
 		if (keys.contains("W")) {
-			sheep->angle = 90;
-			sheep->flip = 0;
+			if (keys.contains("A")) {
+				sheep->angle = 315;
+				sheep->flip = 1;
+			}
+			else if (keys.contains("D")) {
+				sheep->angle = 45;
+				sheep->flip = 0;
+			}
+			else {
+				sheep->angle = 90;
+				sheep->flip = 0;
+			}
 		}
-		if (keys.contains("A")) {
+		else if (keys.contains("S")) {
+			if (keys.contains("A")) {
+				sheep->angle = 45;
+				sheep->flip = 1;
+			}
+			else if (keys.contains("D")) {
+				sheep->angle = 315;
+				sheep->flip = 0;
+			}
+			else {
+				sheep->angle = 270;
+				sheep->flip = 0;
+			}
+		}
+		else if (keys.contains("A")) {
 			sheep->angle = 0;
 			sheep->flip = 1;
 		}
-		if (keys.contains("S")) {
-			sheep->angle = 270;
-			sheep->flip = 0;
-		}
-		if (keys.contains("D")) {
+		else if (keys.contains("D")) {
 			sheep->angle = 0;
 			sheep->flip = 0;
 		}
@@ -134,6 +169,10 @@ void Game::update(int frame) {
 			sheep->move(frame);
 		}
 		sheep->update(frame);
+		if (sheep->health == 0) {
+			prepare();
+			level -= 1;
+		}
 
 		//Sword update
 		sword->sheepify();
@@ -155,12 +194,14 @@ void Game::update(int frame) {
 			levelup();
 		}
 		if (currentKeys.contains("N")) {
-			sword->updatePokeTime(-swordBasePokeTime / 13);
-			levelup();
+			if (updateGold(-1)) {
+				sword->updatePokeTime(-swordBasePokeTime / 13);
+			}
 		}
 		else if (currentKeys.contains("M")) {
-			sword->updateSwingDmg(swordBaseSwingDamage / 6);
-			levelup();
+			if (updateGold(-1)) {
+				sword->updateSwingDmg(swordBaseSwingDamage / 6);
+			}
 		}
 	}
 	if (room == "Level1") {
@@ -170,6 +211,7 @@ void Game::update(int frame) {
 		else {
 			if (bull->defeated(frame)) {
 				prepare();
+				updateGold(1);
 			}
 		}
 	}
@@ -180,7 +222,6 @@ void Game::render() {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderClear(renderer);
 	if (room != "Menu") {
-		std::vector<double> corners(8);
 		sheep->render();
 		if (room != "Prepare") {
 			sword->renderSwing();
@@ -192,12 +233,21 @@ void Game::render() {
 	} else if (room == "Prepare") {
 		progressText->render();
 		upgradeText->render();
+		goldText->render();
 	} else if (room == "Level1") {
 		bull->render();
 	}
 	if (room.starts_with("Level")) {
-		healthText->render();
+		sheepBar->render();
+		enemyBar->render();
+		//render edge of battlefield
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_RenderDrawLine(renderer, battleX, battleY, battleX + edge * width, battleY);
+		SDL_RenderDrawLine(renderer, battleX + edge * width, battleY + edge * height, battleX + edge * width, battleY);
+		SDL_RenderDrawLine(renderer, battleX + edge * width, battleY + edge * height, battleX, battleY + edge * height);
+		SDL_RenderDrawLine(renderer, battleX, battleY, battleX, battleY + edge * height);
 	}
+
 	SDL_RenderPresent(renderer);
 }
 
@@ -228,7 +278,7 @@ int Game::getHeight() {
 }
 
 void Game::prepare() {
-	Mix_HaltMusic();
+	Mix_FadeOutMusic(2000);
 	room = "Prepare";
 	sheep->x = 2 * sheep->width + 100;
 	sheep->y = 2 * sheep->height + 100;
@@ -242,10 +292,26 @@ void Game::levelup() {
 	level++;
 	room = "Level";
 	room = room + std::to_string(level);
-	sheep->width /= 4;
-	sheep->height /= 4;
-	sheep->x = sheep->width / 2;
-	sheep->y = sheep->height / 2;
+	sheep->prepare();
+	Mix_HaltMusic();
+	switch (level) {
+	case 1:
+		bull->prepare();
+		Mix_PlayMusic(bullMusic, -1);
+	}
+}
+
+bool Game::updateGold(int amount) {
+	gold += amount;
+	if (gold >= 0) {
+		goldText->changeText("Gold: " + std::to_string(gold));
+		goldText->x = width - goldText->width / 2;
+	}
+	else {
+		gold -= amount;
+		return false;
+	}
+	return true;
 }
 
 

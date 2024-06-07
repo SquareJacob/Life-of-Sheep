@@ -1,10 +1,12 @@
 #include "Enemy.h"
 
-Enemy::Enemy(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep) :
+Enemy::Enemy(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar) :
 	GameObject(spriteFile, renderer, height) {
 	this->health = health;
+	maxHealth = health;
 	this->sword = sword;
 	this->sheep = sheep;
+	this->bar = bar;
 }
 
 Enemy::~Enemy() {}
@@ -15,9 +17,10 @@ void Enemy::damage(int dmg) {
 		if (sheep->takeDmg(dmg)) {
 			double deltaX = sheep->x - x;
 			double deltaY = sheep->y - y;
-			double length = (deltaX * deltaX + deltaY * deltaY) / knockback;
-			sheep->x += deltaX / knockback;
-			sheep->y += deltaY / knockback;
+			double length = sqrt(deltaX * deltaX + deltaY * deltaY);
+			sheep->x += deltaX * knockback / length;
+			sheep->y += deltaY * knockback / length;
+			sheep->bound();
 		}
 	}
 }
@@ -27,6 +30,7 @@ bool Enemy::damaged(bool swordOut) {
 		if (!beenDamaged) {
 			health -= sword->damage();
 			health = health < 0 ? 0 : health;
+			bar->setValue(health);
 			if (health == 0) {
 				ticker = 0;
 			}
@@ -49,4 +53,9 @@ bool Enemy::defeated(double frame) {
 		return true;
 	}
 	return false;
+}
+
+void Enemy::prepare() {
+	bar->setMax(health);
+	bar->setValue(health);
 }
