@@ -44,4 +44,5 @@ void Sheep::prepare() {
 	y = lowerY;
 	health = maxHealth;
 	bar->setValue(health);
+	setKnockback(0.0, 0.0, 0.0);
 }

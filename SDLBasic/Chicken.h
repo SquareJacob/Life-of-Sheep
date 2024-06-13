@@ -5,7 +5,7 @@ class Chicken :
     public Enemy
 {
 public:
-    Chicken(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar, double edge);
+    Chicken(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar, double edge, SDL_Color fg, SDL_Color bg);
     bool move(double vel);
     void update(double frame);
     void prepare();

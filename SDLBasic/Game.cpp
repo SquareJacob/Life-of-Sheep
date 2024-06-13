@@ -16,15 +16,12 @@ const int sheepBaseHealth = 300;
 int gold = 0;
 
 Sword* sword;
-const int swordBaseSwingDamage = 45;
-const int swordBasePokeTime = 260;
 
-SDL_Color red = { 255, 0, 0 };
+SDL_Color red = { 191, 33, 47 };
 SDL_Color black = { 0, 0, 0 };
-SDL_Color orange = { 255, 165, 0 };
-SDL_Color green = { 0, 255, 0 };
-SDL_Color blue = { 0, 0, 255 };
-SDL_Color yellow = { 255, 255, 0 };
+SDL_Color green = { 0, 111, 60 };
+SDL_Color blue = { 37, 75, 150 };
+SDL_Color yellow = { 250, 167, 63 };
 
 TextArea* progressText;
 TextArea* titleText;
@@ -81,7 +78,7 @@ Game::Game(const char* title, bool fullscreen) {
 		if (renderer) {
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-			progressText = new TextArea("Press Enter to progress", "BlackRunters", 250, black, orange, 1000, renderer, height / 4);
+			progressText = new TextArea("Press Enter to progress", "BlackRunters", 250, black, yellow, 1000, renderer, height / 4);
 			progressText->x = width - progressText->width / 2;
 			progressText->y = height - progressText->height / 2;
 
@@ -89,7 +86,7 @@ Game::Game(const char* title, bool fullscreen) {
 			titleText->x = width / 2;
 			titleText->y = height / 2;
 
-			upgradeText = new TextArea("Press N to upgrade poke speed, M to upgrade swing damage, each costing 1 gold", "BlackRunters", 250, black, orange, 2000, renderer, height / 4);
+			upgradeText = new TextArea("Press N to upgrade poke speed, M to upgrade swing damage, each costing 1 gold. Press B to reset gold and upgrades", "BlackRunters", 250, black, yellow, 2000, renderer, height / 3);
 			upgradeText->y = height - upgradeText->height / 2;
 
 			goldText = new TextArea("Gold :" + std::to_string(gold), "BlackRunters", 250, yellow, black, 10000, renderer, height / 10);
@@ -104,7 +101,7 @@ Game::Game(const char* title, bool fullscreen) {
 			sheep = new Sheep("assets/sheep1.png", renderer, height / 10, (float) height / 5000.0, 0.1, sheepBaseHealth, sheepBar);
 			sheep->setBounds(edge);
 
-			sword = new Sword("assets/sword.png", renderer, height / 10, 0.3, swordBasePokeTime, sheep, 15, swordBaseSwingDamage);
+			sword = new Sword("assets/sword.png", renderer, height / 10, sheep);
 
 			grass = new GameObject("assets/grass.png", renderer, height * 2);
 			grass->x = width / 2;
@@ -116,7 +113,7 @@ Game::Game(const char* title, bool fullscreen) {
 			dog = new Dog("assets/dog.png", renderer, height / 15, 3000, sword, sheep, enemyBar);
 			dog->setBounds(edge);
 
-			chicken = new Chicken("assets/chicken.png", renderer, height / 15, 5000, sword, sheep, enemyBar, edge);
+			chicken = new Chicken("assets/chicken.png", renderer, height / 15, 5000, sword, sheep, enemyBar, edge, yellow, red);
 			chicken->setBounds(edge);
 
 			horse = new Horse("assets/horse.png", renderer, height / 7, 6000, sword, sheep, enemyBar);
@@ -213,6 +210,7 @@ void Game::update(int frame) {
 		sword->sheepify();
 		if (!sword->out()) {
 			if (keys.contains("O")) {
+				//std::cout << "here";
 				sword->beginPoke();
 			} else if (keys.contains("P")) {
 				sword->beginSwing();
@@ -230,13 +228,17 @@ void Game::update(int frame) {
 		}
 		if (currentKeys.contains("N")) {
 			if (updateGold(-1)) {
-				sword->updatePokeTime(-swordBasePokeTime / 13);
+				sword->updatePokeTime();
 			}
 		}
 		else if (currentKeys.contains("M")) {
 			if (updateGold(-1)) {
-				sword->updateSwingDmg(swordBaseSwingDamage / 6);
+				sword->updateSwingDmg();
 			}
+		}
+		else if (currentKeys.contains("B")) {
+			sword->reset();
+			updateGold(level);
 		}
 	}
 	if (room == "Level1") {
@@ -250,7 +252,7 @@ void Game::update(int frame) {
 			}
 		}
 		else if (cow->ticker == 1) {
-			cow->speak("moo-hoo-hoo, what a suprise");		
+			cow->speak("moo-hoo-hoo, what a suprise [Enter]");		
 			if (currentKeys.contains("Return")) {
 				cow->ticker = 2;
 			}
@@ -400,13 +402,6 @@ void Game::update(int frame) {
 
 void Game::render() {
 	grass->render();
-	if (room != "Menu") {
-		sheep->render();
-		if (room != "Prepare") {
-			sword->renderSwing();
-			cow->render();
-		}
-	}
 	if (room == "Menu") {
 		progressText->render();
 		titleText->render();
@@ -436,7 +431,13 @@ void Game::render() {
 		SDL_RenderDrawLine(renderer, battleX + edge * width, battleY + edge * height, battleX, battleY + edge * height);
 		SDL_RenderDrawLine(renderer, battleX, battleY, battleX, battleY + edge * height);
 	}
-
+	if (room != "Menu") {
+		sheep->render();
+		if (room != "Prepare") {
+			sword->renderSwing();
+			cow->render();
+		}
+	}
 	SDL_RenderPresent(renderer);
 }
 

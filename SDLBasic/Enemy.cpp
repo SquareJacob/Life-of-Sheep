@@ -62,8 +62,10 @@ bool Enemy::defeated(double frame) {
 }
 
 void Enemy::prepare() {
-	bar->setMax(health);
+	health = maxHealth;
+	bar->setMax(maxHealth);
 	bar->setValue(health);
+	setKnockback(0.0, 0.0, 0.0);
 }
 
 void Enemy::render() {

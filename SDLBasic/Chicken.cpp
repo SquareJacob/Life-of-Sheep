@@ -1,15 +1,13 @@
 #include "Chicken.h"
 
-Chicken::Chicken(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar, double edge) :
+Chicken::Chicken(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar, double edge, SDL_Color fg, SDL_Color bg) :
 	Enemy(spriteFile, renderer, height, health, sword, sheep, bar) {
 	speed = (float)height / 1000.0;
-	SDL_Color green = { 255, 255, 0 };
-	SDL_Color red = { 255, 0, 0 };
 	chickHealth = health / 10;
 	chickCost = health / 20;
 	Bar* chickBar;
 	for (int i = 0; i < 3; i++) {
-		chickBar = new Bar(chickHealth, chickHealth, green, red, 0, 0, 100, false, renderer);
+		chickBar = new Bar(chickHealth, chickHealth, fg, bg, 0, 0, 100, false, renderer);
 		chicks.push_back(new Chick("assets/egg.png", renderer, height / 2, chickHealth, sword, sheep, chickBar));
 		chickBar->updateHeight(height / 4);
 		chickBar->updateLength(chicks[i]->width * 1.5);

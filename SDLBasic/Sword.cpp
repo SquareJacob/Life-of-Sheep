@@ -1,16 +1,10 @@
 #include "Sword.h"
 
-Sword::Sword(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, double speed, int pokeTime, Sheep* sheep, int pDmg, int sDmg) :
+Sword::Sword(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, Sheep* sheep) :
 	GameObject(spriteFile, renderer, height) {
-	this->speed = speed;
-	this->pokeTime = pokeTime;
-	this->pDmg = pDmg;
-	this->sDmg = sDmg;
 	this->sheepWidth = sheep->width / 2;
 	this->sheep = sheep;
-	poke = 0;
-	swordAngle = 0.0;
-	sAngle = 0.0;
+	reset();
 }
 
 void Sword::sheepify() {
@@ -64,12 +58,12 @@ void Sword::renderSwing(){
 	}
 }
 
-void Sword::updatePokeTime(int amount) {
-	pokeTime += amount;
+void Sword::updatePokeTime() {
+	pokeTime -= upgradePokeTime;
 }
 
-void Sword::updateSwingDmg(int amount) {
-	sDmg += amount;
+void Sword::updateSwingDmg() {
+	sDmg += sUpgradeDmg;
 }
 
 bool Sword::poking() {
@@ -90,4 +84,9 @@ int Sword::damage() {
 	else {
 		return 0;
 	}
+}
+
+void Sword::reset() {
+	pokeTime = basePokeTime;
+	sDmg = sBaseDmg;
 }

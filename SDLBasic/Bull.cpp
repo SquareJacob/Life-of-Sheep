@@ -33,7 +33,17 @@ void Bull::update(double frame) {
 	}
 	else if (ticker == 8) { //CHARGE!!
 		if (move(frame)) {
-			ticker = 9;
+			//std::cout << cos(radians) << ' ' << sin(radians) << std::endl;
+			if (x == lowerX || x == upperX) {
+				if (abs(cos(radians)) > 0.1) {
+					ticker = 9;
+				}
+			}
+			if (y == lowerY || y == upperY) {
+				if (abs(sin(radians)) > 0.1) {
+					ticker = 9;
+				}
+			}
 		}
 		damage(30);
 	}
