@@ -51,7 +51,7 @@ GameObject* grass;
 
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
-	level = 3;
+	level = 0;
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0 && TTF_Init() == 0 && Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == 0) {
 		std::cout << "Subsystem initialized..." << std::endl;
 		//Get current display size
