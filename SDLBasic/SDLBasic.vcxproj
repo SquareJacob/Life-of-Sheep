@@ -136,9 +136,14 @@
   <ItemGroup>
     <ClCompile Include="Bar.cpp" />
     <ClCompile Include="Bull.cpp" />
+    <ClCompile Include="Chick.cpp" />
+    <ClCompile Include="Chicken.cpp" />
+    <ClCompile Include="Cow.cpp" />
+    <ClCompile Include="Dog.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="Horse.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Sheep.cpp" />
     <ClCompile Include="Sprite.cpp" />
@@ -148,9 +153,14 @@
   <ItemGroup>
     <ClInclude Include="Bar.h" />
     <ClInclude Include="Bull.h" />
+    <ClInclude Include="Chick.h" />
+    <ClInclude Include="Chicken.h" />
+    <ClInclude Include="Cow.h" />
+    <ClInclude Include="Dog.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GameObject.h" />
+    <ClInclude Include="Horse.h" />
     <ClInclude Include="Sheep.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Sword.h" />
@@ -158,12 +168,23 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\bull.png" />
+    <Image Include="assets\chick.png" />
+    <Image Include="assets\chicken.png" />
+    <Image Include="assets\cow.png" />
+    <Image Include="assets\dog.png" />
+    <Image Include="assets\egg.png" />
+    <Image Include="assets\grass.png" />
+    <Image Include="assets\horse.png" />
     <Image Include="assets\sheep1.png" />
     <Image Include="assets\sword.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\A sheepish menu.ogg" />
     <None Include="assets\CHARGE!!.ogg" />
+    <None Include="assets\cock.ogg" />
+    <None Include="assets\horsin%27 around.ogg" />
+    <None Include="assets\lets play fetch.ogg" />
+    <None Include="assets\moo.ogg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

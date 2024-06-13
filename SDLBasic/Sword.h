@@ -17,7 +17,7 @@ public:
     //Set position and angle relative to sheep
     void sheepify();
     //progress current swing or poke, and move sword based on swordAngle
-    bool swing(int frame);
+    void swing(int frame);
     //whether or not sword is currently midaction or on cooldown
     bool out();
     void beginPoke();
@@ -31,6 +31,7 @@ public:
     bool poking();
     bool swinging();
     int damage();
+    bool swordOut = false;
 private:
     double speed; //porpotional to speed of swing
     double sAngle; //sheep Angle

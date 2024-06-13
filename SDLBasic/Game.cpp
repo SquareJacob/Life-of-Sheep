@@ -5,17 +5,19 @@
 #include "Bull.h"
 #include "TextArea.h"
 #include "Bar.h"
+#include "Cow.h"
+#include "Dog.h"
+#include "Chicken.h"
+#include "Horse.h"
 #include <SDL_mixer.h>
-#include <string>
 
 Sheep* sheep;
 const int sheepBaseHealth = 300;
 int gold = 0;
 
 Sword* sword;
-const int swordBaseSwingDamage = 30;
+const int swordBaseSwingDamage = 45;
 const int swordBasePokeTime = 260;
-bool swordOut = false;
 
 SDL_Color red = { 255, 0, 0 };
 SDL_Color black = { 0, 0, 0 };
@@ -30,16 +32,26 @@ TextArea* upgradeText;
 TextArea* goldText;
 
 Bull* bull;
+Dog* dog;
+Chicken* chicken;
+Horse* horse;
+Cow* cow;
 
 Mix_Music* menuMusic;
 Mix_Music* bullMusic;
+Mix_Music* mooMusic;
+Mix_Music* dogMusic;
+Mix_Music* chickenMusic;
+Mix_Music* horseMusic;
 
 Bar* sheepBar;
 Bar* enemyBar;
 
+GameObject* grass;
+
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
-	level = 0;
+	level = 3;
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0 && TTF_Init() == 0 && Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == 0) {
 		std::cout << "Subsystem initialized..." << std::endl;
 		//Get current display size
@@ -57,39 +69,62 @@ Game::Game(const char* title, bool fullscreen) {
 			std::cout << SDL_GetError() << std::endl;
 		}
 		menuMusic = Mix_LoadMUS("assets/a sheepish menu.ogg");
-		bullMusic = Mix_LoadMUS("assets/CHARGE!!.ogg");
 		Mix_PlayMusic(menuMusic, -1);
+		bullMusic = Mix_LoadMUS("assets/CHARGE!!.ogg");
+		mooMusic = Mix_LoadMUS("assets/moo.ogg");
+		dogMusic = Mix_LoadMUS("assets/lets play fetch.ogg");
+		chickenMusic = Mix_LoadMUS("assets/cock.ogg");
+		horseMusic = Mix_LoadMUS("assets/horsin' around.ogg");
 		//SDL_SetWindowResizable(window, SDL_TRUE);
 		//Create renderer and game objects
 		renderer = SDL_CreateRenderer(window, -1, 0);
 		if (renderer) {
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-			progressText = new TextArea("Press Enter to progress", "BlackRunters", 250, black, orange, 1000, renderer, 250);
+			progressText = new TextArea("Press Enter to progress", "BlackRunters", 250, black, orange, 1000, renderer, height / 4);
 			progressText->x = width - progressText->width / 2;
 			progressText->y = height - progressText->height / 2;
 
-			titleText = new TextArea("Life of Sheep", "BlackRunters", 250, blue, green, 3000, renderer, 150);
+			titleText = new TextArea("Life of Sheep", "BlackRunters", 250, blue, green, 3000, renderer, height / 6);
 			titleText->x = width / 2;
 			titleText->y = height / 2;
 
-			upgradeText = new TextArea("Press N to upgrade poke speed, M to upgrade swing damage, each costing 1 gold", "BlackRunters", 250, black, orange, 2000, renderer, 250);
+			upgradeText = new TextArea("Press N to upgrade poke speed, M to upgrade swing damage, each costing 1 gold", "BlackRunters", 250, black, orange, 2000, renderer, height / 4);
 			upgradeText->y = height - upgradeText->height / 2;
 
-			goldText = new TextArea("Gold :" + std::to_string(gold), "BlackRunters", 250, yellow, black, 10000, renderer, 100);
-			updateGold(0);
+			goldText = new TextArea("Gold :" + std::to_string(gold), "BlackRunters", 250, yellow, black, 10000, renderer, height / 10);
+			updateGold(level);
 
 			sheepBar = new Bar(sheepBaseHealth, sheepBaseHealth, green, red, 0, 0, height, true, renderer);
+			sheepBar->updateHeight(battleX);
 
-			enemyBar = new Bar(1, 1, red, green, width - sheepBar->height, 0, height, true, renderer);
+			enemyBar = new Bar(1, 1, red, blue, width - sheepBar->getHeight(), 0, height, true, renderer);
+			enemyBar->updateHeight(battleX);
 
-			sheep = new Sheep("assets/sheep1.png", renderer, 100, 0.2, 0.1, sheepBaseHealth, sheepBar);
+			sheep = new Sheep("assets/sheep1.png", renderer, height / 10, (float) height / 5000.0, 0.1, sheepBaseHealth, sheepBar);
 			sheep->setBounds(edge);
 
-			sword = new Sword("assets/sword.png", renderer, 100, 0.3, swordBasePokeTime, sheep, 15, swordBaseSwingDamage);
+			sword = new Sword("assets/sword.png", renderer, height / 10, 0.3, swordBasePokeTime, sheep, 15, swordBaseSwingDamage);
 
-			bull = new Bull("assets/bull.png", renderer, 100, 5000, sword, sheep, enemyBar);
+			grass = new GameObject("assets/grass.png", renderer, height * 2);
+			grass->x = width / 2;
+			grass->y = height / 2;
+
+			bull = new Bull("assets/bull.png", renderer, height / 10, 3000, sword, sheep, enemyBar);
 			bull->setBounds(edge);
+
+			dog = new Dog("assets/dog.png", renderer, height / 15, 3000, sword, sheep, enemyBar);
+			dog->setBounds(edge);
+
+			chicken = new Chicken("assets/chicken.png", renderer, height / 15, 5000, sword, sheep, enemyBar, edge);
+			chicken->setBounds(edge);
+
+			horse = new Horse("assets/horse.png", renderer, height / 7, 6000, sword, sheep, enemyBar);
+			horse->setBounds(edge);
+
+			cow = new Cow("assets/cow.png", renderer, height / 10, 1000, sword, sheep, enemyBar);
+			cow->x = width / 2;
+			cow->y = cow->height * 1.5;
 
 		}
 		else {
@@ -183,7 +218,7 @@ void Game::update(int frame) {
 				sword->beginSwing();
 			}
 		}
-		swordOut = sword->swing(frame);
+		sword->swing(frame);
 	}
 	if (room == "Menu") {
 		if (currentKeys.contains("Return")) {
@@ -205,26 +240,171 @@ void Game::update(int frame) {
 		}
 	}
 	if (room == "Level1") {
-		if (!bull->damaged(swordOut)) {
+		if (!bull->damaged()) {
 			bull->update(frame);
 		}
-		else {
-			if (bull->defeated(frame)) {
+		else if (cow->ticker == -1) {
+			if (cow->wiggle(frame)) {
+				cow->ticker = 1;
+				Mix_PlayMusic(mooMusic, -1);
+			}
+		}
+		else if (cow->ticker == 1) {
+			cow->speak("moo-hoo-hoo, what a suprise");		
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 2;
+			}
+		}
+		else if (cow->ticker == 2) {
+			cow->speak("sheep beating bull, now that is new");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 3;
+			}
+		}
+		else if (cow->ticker == 3) {
+			cow->speak("but how long can you last?");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 4;
+			}
+		}
+		else if (cow->ticker == 4) {
+			if (cow->wiggle(-frame)) {
 				prepare();
 				updateGold(1);
 			}
 		}
+		else if (bull->defeated(frame)) {
+			cow->ticker = -1;
+			Mix_FadeOutMusic(1000);
+		}
 	}
+	else if (room == "Level2") {
+		if (!dog->damaged()) {
+			dog->update(frame);
+		}
+		else if (cow->ticker == -1) {
+			if (cow->wiggle(frame)) {
+				cow->ticker = 1;
+				Mix_PlayMusic(mooMusic, -1);
+			}
+		}
+		else if (cow->ticker == 1) {
+			cow->speak("impressive, udderly impressive");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 2;
+			}
+		}
+		else if (cow->ticker == 2) {
+			cow->speak("sheep defeating dog, what a tragedy");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 3;
+			}
+		}
+		else if (cow->ticker == 3) {
+			cow->speak("but to what end?");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 4;
+			}
+		}
+		else if (cow->ticker == 4) {
+			if (cow->wiggle(-frame)) {
+				prepare();
+				updateGold(1);
+			}
+		}
+		else if (dog->defeated(frame)) {
+			cow->ticker = -1;
+			Mix_FadeOutMusic(1000);
+		}
+	}
+	else if (room == "Level3") {
+		if (!chicken->damaged()) {
+			chicken->update(frame);
+		}
+		else if (cow->ticker == -1) {
+			if (cow->wiggle(frame)) {
+				cow->ticker = 1;
+				Mix_PlayMusic(mooMusic, -1);
+			}
+		}
+		else if (cow->ticker == 1) {
+			cow->speak("you have gone far enough");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 2;
+			}
+		}
+		else if (cow->ticker == 2) {
+			cow->speak("sheep crushing chicken, the world is changed");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 3;
+			}
+		}
+		else if (cow->ticker == 3) {
+			cow->speak("but do you really think you can escape?");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 4;
+			}
+		}
+		else if (cow->ticker == 4) {
+			if (cow->wiggle(-frame)) {
+				prepare();
+				updateGold(1);
+			}
+		}
+		else if (chicken->defeated(frame)) {
+			cow->ticker = -1;
+			Mix_FadeOutMusic(1000);
+		}
+	}
+	else if (room == "Level4") {
+		if (!horse->damaged()) {
+			horse->update(frame);
+		}
+		else if (cow->ticker == -1) {
+			if (cow->wiggle(frame)) {
+				cow->ticker = 1;
+				Mix_PlayMusic(mooMusic, -1);
+			}
+		}
+		else if (cow->ticker == 1) {
+			cow->speak("...");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 2;
+			}
+		}
+		else if (cow->ticker == 2) {
+			cow->speak("sheep");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 3;
+			}
+		}
+		else if (cow->ticker == 3) {
+			cow->speak("it is time");
+			if (currentKeys.contains("Return")) {
+				cow->ticker = 4;
+			}
+		}
+		else if (cow->ticker == 4) {
+			if (cow->wiggle(-frame)) {
+				prepare();
+				updateGold(1);
+			}
+		}
+		else if (horse->defeated(frame)) {
+			cow->ticker = -1;
+			Mix_FadeOutMusic(1000);
+		}
+		}
 }
 
 
 void Game::render() {
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_RenderClear(renderer);
+	grass->render();
 	if (room != "Menu") {
 		sheep->render();
 		if (room != "Prepare") {
 			sword->renderSwing();
+			cow->render();
 		}
 	}
 	if (room == "Menu") {
@@ -236,6 +416,15 @@ void Game::render() {
 		goldText->render();
 	} else if (room == "Level1") {
 		bull->render();
+	}
+	else if (room == "Level2") {
+		dog->render();
+	}
+	else if (room == "Level3") {
+		chicken->render();
+	}
+	else if (room == "Level4") {
+		horse->render();
 	}
 	if (room.starts_with("Level")) {
 		sheepBar->render();
@@ -255,6 +444,7 @@ void Game::clean() {
 	SDL_DestroyWindow(window);
 	SDL_DestroyRenderer(renderer);
 	Mix_FreeMusic(menuMusic);
+	TTF_Quit();
 	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
@@ -278,7 +468,7 @@ int Game::getHeight() {
 }
 
 void Game::prepare() {
-	Mix_FadeOutMusic(2000);
+	Mix_FadeOutMusic(1000);
 	room = "Prepare";
 	sheep->x = 2 * sheep->width + 100;
 	sheep->y = 2 * sheep->height + 100;
@@ -292,12 +482,25 @@ void Game::levelup() {
 	level++;
 	room = "Level";
 	room = room + std::to_string(level);
+	cow->ticker = 0;
 	sheep->prepare();
 	Mix_HaltMusic();
 	switch (level) {
 	case 1:
 		bull->prepare();
 		Mix_PlayMusic(bullMusic, -1);
+		break;
+	case 2:
+		dog->prepare();
+		Mix_PlayMusic(dogMusic, -1);
+		break;
+	case 3:
+		chicken->prepare();
+		Mix_PlayMusic(chickenMusic, -1);
+		break;
+	case 4:
+		horse->prepare();
+		Mix_PlayMusic(horseMusic, -1);
 	}
 }
 

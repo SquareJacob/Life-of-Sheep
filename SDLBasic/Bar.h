@@ -10,13 +10,18 @@ public:
     //updates physical bar
     void setMax(Uint32 value);
     void render();
-    Uint16 height = 12;
+    void updateHeight(Uint16 height);
+    void updateLength(Uint16 length);
+    void updatePos(int16_t x, int16_t y);
+    Uint16 getHeight();
 protected:
     void createRects();
     void updateBar();
+    Uint16 height = 12;
     Uint32 iValue, mValue;
     SDL_Color fColor, bColor;
-    Uint16 length, x, y;
+    Uint16 length;
+    int16_t x, y;
     bool vertical;
     SDL_Rect fg, bg;
     SDL_Renderer* renderer;

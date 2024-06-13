@@ -1,4 +1,5 @@
 #include "Bar.h"
+#include <string>
 
 Bar::Bar(Uint32 iValue, Uint32 mValue, SDL_Color fg, SDL_Color bg, Uint16 x, Uint16 y, Uint16 length, bool vertical, SDL_Renderer* renderer) {
 	this->iValue = iValue;
@@ -10,6 +11,12 @@ Bar::Bar(Uint32 iValue, Uint32 mValue, SDL_Color fg, SDL_Color bg, Uint16 x, Uin
 	this->x = x;
 	this->y = y;
 	this->renderer = renderer;
+	createRects();
+}
+
+void Bar::updatePos(int16_t x, int16_t y) {
+	this->x = x;
+	this->y = y;
 	createRects();
 }
 
@@ -37,7 +44,7 @@ void Bar::updateBar() {
 		fg.y += length - length * iValue / mValue;
 	}
 	else {
-		fg.w = length;
+		fg.w = length * iValue / mValue;
 		fg.h = height - height / 3;
 		fg.y += height / 6;
 	}
@@ -49,6 +56,7 @@ void Bar::setValue(Uint32 value) {
 }
 
 void Bar::render() {
+	//std::cout << std::to_string(iValue) + "/" + std::to_string(mValue) << std::endl;
 	SDL_SetRenderDrawColor(renderer, bColor.r, bColor.g, bColor.b, 255);
 	SDL_RenderFillRect(renderer, &bg);
 	SDL_SetRenderDrawColor(renderer, fColor.r, fColor.g, fColor.b, 255);
@@ -58,4 +66,18 @@ void Bar::render() {
 void Bar::setMax(Uint32 value) {
 	mValue = value;
 	updateBar();
+}
+
+void Bar::updateHeight(Uint16 height) {
+	this->height = height;
+	createRects();
+}
+
+void Bar::updateLength(Uint16 length) {
+	this->length = length;
+	createRects();
+}
+
+Uint16 Bar::getHeight() {
+	return height;
 }

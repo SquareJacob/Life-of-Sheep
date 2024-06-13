@@ -2,6 +2,7 @@
 #include "Sprite.h";
 
 void GameObject::objectize(uint16_t height) {
+	sprites.push_back(sprite);
 	angle = 0.0;
 	radians = 0.0;
 	flip = 0;
@@ -30,6 +31,11 @@ GameObject::GameObject(std::string text, std::string font, int size, SDL_Color f
 	objectize(height);
 }
 
+GameObject::GameObject(std::string text, std::string font, int size, SDL_Color fg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height) {
+	sprite = new Sprite(text, font, size, fg, wrapLength, renderer);
+	objectize(height);
+}
+
 GameObject::~GameObject() {}
 
 void GameObject::render() {
@@ -42,9 +48,13 @@ double GameObject::setRadians() {
 }
 
 bool GameObject::shift(double vel) {
+	slide(vel);
+	return bound();
+}
+
+void GameObject::slide(double vel) {
 	x += vel * cos(setRadians()) * (1 - 4 * flip + 2 * flip * flip);
 	y -= vel * sin(radians) * (1 - 4 * flip + 2 * flip * flip);
-	return bound();
 }
 
 void GameObject::tilt(double vel) {
@@ -215,6 +225,35 @@ bool GameObject::collided(GameObject* object, bool talk) {
 		}
 	}
 	return intersections == 4;
+}
+
+void GameObject::addSprite(const char* file) {
+	sprites.push_back(new Sprite(file, sprite->renderer));
+}
+
+void GameObject::setSprite(uint8_t number) {
+	sprite = sprites[number];
+	width = sprite->getPorportion() * height;
+}
+
+void GameObject::setKnockback(double x, double y, double time) {
+	knockX = x;
+	knockY = y;
+	knockTime = time;
+}
+
+void GameObject::knockback(double frame) {
+	if (knockTime > 0.0) {
+		x += knockX * frame / 1000.0;
+		y += knockY * frame / 1000.0;
+		if (bound()) {
+			knockTime = 0.0;
+		}
+		else {
+			knockTime -= frame;
+			knockTime = knockTime < 0.0 ? 0.0 : knockTime;
+		}
+	}
 }
 
 double GameObject::c = 0.0;

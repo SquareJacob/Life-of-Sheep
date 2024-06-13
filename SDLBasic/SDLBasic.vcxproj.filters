@@ -63,6 +63,21 @@
     <ClCompile Include="Bar.cpp">
       <Filter>src\Generics</Filter>
     </ClCompile>
+    <ClCompile Include="Cow.cpp">
+      <Filter>src\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="Dog.cpp">
+      <Filter>src\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="Chicken.cpp">
+      <Filter>src\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="Chick.cpp">
+      <Filter>src\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="Horse.cpp">
+      <Filter>src\Enemies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enemy.h">
@@ -92,6 +107,21 @@
     <ClInclude Include="Bar.h">
       <Filter>Header Files\Generics</Filter>
     </ClInclude>
+    <ClInclude Include="Cow.h">
+      <Filter>Header Files\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="Dog.h">
+      <Filter>Header Files\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="Chicken.h">
+      <Filter>Header Files\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="Chick.h">
+      <Filter>Header Files\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="Horse.h">
+      <Filter>Header Files\Enemies</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\sheep1.png">
@@ -103,12 +133,45 @@
     <Image Include="assets\bull.png">
       <Filter>assets</Filter>
     </Image>
+    <Image Include="assets\grass.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\cow.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\dog.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\chicken.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\chick.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\egg.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\horse.png">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\A sheepish menu.ogg">
       <Filter>assets</Filter>
     </None>
     <None Include="assets\CHARGE!!.ogg">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\moo.ogg">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\lets play fetch.ogg">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\cock.ogg">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\horsin%27 around.ogg">
       <Filter>assets</Filter>
     </None>
   </ItemGroup>

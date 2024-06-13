@@ -39,10 +39,28 @@ void Sprite::textualize(std::string text, std::string path, int size, SDL_Color 
 	texturize(tmpSurface);
 }
 
+void Sprite::textualize(std::string text, std::string path, int size, SDL_Color fg, Uint32 wrapLength) {
+	TTF_Font* Font = TTF_OpenFont(path.c_str(), size);
+	if (Font == NULL) {
+		std::cout << SDL_GetError() << std::endl;
+		porportion = 1.0;
+		return;
+	}
+	SDL_Surface* tmpSurface = TTF_RenderText_Blended_Wrapped(Font, text.c_str(), fg, wrapLength);
+	TTF_CloseFont(Font);
+	texturize(tmpSurface);
+}
+
 Sprite::Sprite(std::string text, std::string font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer) {
 	this->renderer = renderer;
 	std::string path = "assets/" + font + ".otf";
 	textualize(text, path, size, fg, bg, wrapLength);
+}
+
+Sprite::Sprite(std::string text, std::string font, int size, SDL_Color fg, Uint32 wrapLength, SDL_Renderer* renderer) {
+	this->renderer = renderer;
+	std::string path = "assets/" + font + ".otf";
+	textualize(text, path, size, fg, wrapLength);
 }
 
 Sprite::~Sprite() {}

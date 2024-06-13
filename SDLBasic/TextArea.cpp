@@ -8,13 +8,29 @@ TextArea::TextArea(std::string text, std::string font, int size, SDL_Color fg, S
 	this->text = text;
 	this->wrapLength = wrapLength;
 	this->font = "assets/" + font + ".otf";
+	background = true;
+}
+
+TextArea::TextArea(std::string text, std::string font, int size, SDL_Color fg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height) :
+	GameObject(text, font, size, fg, wrapLength, renderer, height) {
+	this->fg = fg;
+	this->size = size;
+	this->text = text;
+	this->wrapLength = wrapLength;
+	this->font = "assets/" + font + ".otf";
+	background = false;
 }
 
 TextArea::~TextArea() {}
 
 void TextArea::retext() {
 	SDL_DestroyTexture(sprite->texture);
-	sprite->textualize(text, font, size, fg, bg, wrapLength);
+	if (background) {
+		sprite->textualize(text, font, size, fg, bg, wrapLength);
+	}
+	else {
+		sprite->textualize(text, font, size, fg, wrapLength);
+	}
 	width = sprite->getPorportion() * height;
 }
 

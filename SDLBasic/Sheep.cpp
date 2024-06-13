@@ -34,6 +34,7 @@ bool Sheep::takeDmg(int dmg) {
 void Sheep::update(int frame) {
 	immunity -= frame;
 	immunity = immunity < 0 ? 0 : immunity;
+	knockback(frame);
 }
 
 void Sheep::prepare() {

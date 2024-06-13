@@ -2,6 +2,7 @@
 
 Bull::Bull(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar) :
 	Enemy(spriteFile, renderer, height, health, sword, sheep, bar) {
+	speed = (float) height / 333.3333333;
 }
 
 Bull::~Bull() {}
@@ -12,16 +13,7 @@ bool Bull::move(double vel) {
 
 void Bull::update(double frame) {
 	if (ticker <= 0) { //look at sheep
-		angle = atan2(y - sheep->y, sheep->x - x) * 180.0 / PI;
-		if (angle < 0) {
-			angle += 360.0;
-		}
-		if (90 < angle && angle < 270) {
-			flip = 2;
-		}
-		else {
-			flip = 0;
-		}
+		lookAt(sheep);
 		cAngle = angle;
 		ticker += frame / 3000;
 		damage(5);

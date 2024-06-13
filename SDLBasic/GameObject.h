@@ -1,10 +1,12 @@
 #pragma once
 #include "Sprite.h"
 #include <math.h>
+#include <string>
 #include <cmath>
 #include <vector>
 #define PI 3.14159265
 #define QPI PI/4.0 //Quarter of PI
+#define TAU PI * 2
 //Should be subclassed into specific objects
 class GameObject
 {
@@ -25,6 +27,14 @@ public:
 	//renderer: what sprite will be rendererd to
 	//height: height of object; width will be based on porportions of original sprite
 	GameObject(std::string text, std::string font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height);
+	//Creates sprite text area.
+	//font: font file
+	//size: size of text
+	//fg: foreground color
+	//wrapLength: length to wrap text at
+	//renderer: what sprite will be rendererd to
+	//height: height of object; width will be based on porportions of original sprite
+	GameObject(std::string text, std::string font, int size, SDL_Color fg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height);
 	~GameObject();
 	//renders the object, centered at (x,y)
 	void render();
@@ -32,6 +42,8 @@ public:
 	double setRadians();
 	//Moves object in direction it is facing, or opposite if vel < 0. vel porpotional to change in position, returns if it hit an edge
 	bool shift(double vel);
+	//Moves object in direction it is facing, or opposite if vel < 0. vel porportional to change in position. Ignores edges
+	void slide(double vel);
 	//Rotates object amount porportional to vel. ccw is positive. Sets radians
 	void tilt(double vel);
 	//setup local edge collision bounds
@@ -44,6 +56,10 @@ public:
 	void renderHitBox(int r, int g, int b);
 	//check collision
 	bool collided(GameObject* object, bool talk = false);
+	void addSprite(const char* file);
+	void setSprite(uint8_t number);
+	void setKnockback(double x, double y, double time);
+	void knockback(double frame);
 	int16_t width;
 	int16_t height;
 	int16_t cWidth, cHeight;
@@ -56,8 +72,12 @@ protected:
 	//prep function used in constructors
 	void objectize(uint16_t height);
 	Sprite* sprite;
+	std::vector<Sprite*> sprites;
 	int gameWidth = 0, gameHeight = 0;
 	int16_t lowerX, lowerY, upperX, upperY;
+	double knockX = 0.0;
+	double knockY = 0.0;
+	double knockTime = 0.0;
 private:
 	static double c, s;
 	static std::vector<double> corners; //even is x, odd is y, goes in order of quadrant before rotation and flip
