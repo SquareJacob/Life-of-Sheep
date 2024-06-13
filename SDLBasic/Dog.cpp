@@ -69,7 +69,7 @@ void Dog::update(double frame) {
 			if (move(frame)) {
 				ticker = 0;
 			}
-			damage(15);
+			damage(10);
 		}
 	}
 	else if (behavior == 1) {
