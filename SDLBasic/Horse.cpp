@@ -32,7 +32,7 @@ void Horse::update(double frame) {
 		velY = 0.0;
 	}
 	knockback(frame);
-	damage(hypot(velX, velY) * 100.0);
+	damage(hypot(velX, velY) * 50.0 + 10);
 }
 
 void Horse::prepare() {

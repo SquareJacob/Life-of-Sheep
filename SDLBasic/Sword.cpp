@@ -22,7 +22,7 @@ void Sword::swing(int frame) {
 		if (swordAngle < 0) {
 			swordAngle = 0;
 		}
-		angle += (1 - flip) * swordAngle + 90 * (2 - flip);
+		angle += swordAngle + 180;
 		result = true;
 	}
 	if (poke > 0) {
@@ -59,11 +59,11 @@ void Sword::renderSwing(){
 }
 
 void Sword::updatePokeTime() {
-	pokeTime -= upgradePokeTime;
+	pokeTime /= upgrade;
 }
 
 void Sword::updateSwingDmg() {
-	sDmg += sUpgradeDmg;
+	sDmg *= upgrade;
 }
 
 bool Sword::poking() {

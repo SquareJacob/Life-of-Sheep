@@ -17,7 +17,7 @@ void Chick::hatch() {
 }
 
 bool Chick::move(double vel) {
-	bool result = shift(speed * vel * (1.0 + stage / 2.0));
+	bool result = shift(speed * vel * stage);
 	bar->updatePos(x - width / 2, y + height / 2);
 	return result;
 }
@@ -44,6 +44,9 @@ void Chick::update(double frame) {
 		else if (behavior == 1) {
 			bar->updatePos(x - width / 2, y + height / 2);
 			ticker += frame / 1000.0;
+			if (ticker < stage / 6.0) {
+				lookAt(sheep);
+			}
 			if (ticker > 1.0) {
 				behavior = 2;
 			}
@@ -56,10 +59,12 @@ void Chick::update(double frame) {
 				behavior = 0;
 			}
 		}
-		damage(10 * (1.0 + stage));
+		damage(10 * stage);
 		if (damaged()) {
 			prepare();
 		}
+		stage += frame / 50000.0;
+		stage = stage > 4.0 ? 4.0 : stage;
 	}
 }
 

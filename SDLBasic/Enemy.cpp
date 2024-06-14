@@ -66,6 +66,7 @@ void Enemy::prepare() {
 	bar->setMax(maxHealth);
 	bar->setValue(health);
 	setKnockback(0.0, 0.0, 0.0);
+	hits = 0;
 }
 
 void Enemy::render() {

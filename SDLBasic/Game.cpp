@@ -48,7 +48,7 @@ GameObject* grass;
 
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
-	level = 0;
+	level = 2;
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0 && TTF_Init() == 0 && Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == 0) {
 		std::cout << "Subsystem initialized..." << std::endl;
 		//Get current display size
@@ -78,7 +78,7 @@ Game::Game(const char* title, bool fullscreen) {
 		if (renderer) {
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
-			progressText = new TextArea("Press Enter to progress", "BlackRunters", 250, black, yellow, 1000, renderer, height / 4);
+			progressText = new TextArea("Use WASD to move, hold down to space to prevent movement. Use O to poke and P to swing. Press Enter to progress", "BlackRunters", 250, black, yellow, 3000, renderer, height / 4);
 			progressText->x = width - progressText->width / 2;
 			progressText->y = height - progressText->height / 2;
 
@@ -107,16 +107,16 @@ Game::Game(const char* title, bool fullscreen) {
 			grass->x = width / 2;
 			grass->y = height / 2;
 
-			bull = new Bull("assets/bull.png", renderer, height / 10, 3000, sword, sheep, enemyBar);
+			bull = new Bull("assets/bull.png", renderer, height / 10, 6000, sword, sheep, enemyBar);
 			bull->setBounds(edge);
 
-			dog = new Dog("assets/dog.png", renderer, height / 15, 3000, sword, sheep, enemyBar);
+			dog = new Dog("assets/dog.png", renderer, height / 15, 6000, sword, sheep, enemyBar);
 			dog->setBounds(edge);
 
-			chicken = new Chicken("assets/chicken.png", renderer, height / 15, 5000, sword, sheep, enemyBar, edge, yellow, red);
+			chicken = new Chicken("assets/chicken.png", renderer, height / 15, 10000, sword, sheep, enemyBar, edge, yellow, red);
 			chicken->setBounds(edge);
 
-			horse = new Horse("assets/horse.png", renderer, height / 7, 6000, sword, sheep, enemyBar);
+			horse = new Horse("assets/horse.png", renderer, height / 7, 12000, sword, sheep, enemyBar);
 			horse->setBounds(edge);
 
 			cow = new Cow("assets/cow.png", renderer, height / 10, 1000, sword, sheep, enemyBar);
@@ -197,7 +197,7 @@ void Game::update(int frame) {
 			sheep->angle = 0;
 			sheep->flip = 0;
 		}
-		if (keys.contains("W") || keys.contains("A") || keys.contains("S") || keys.contains("D")) {
+		if ((keys.contains("W") || keys.contains("A") || keys.contains("S") || keys.contains("D")) && !keys.contains("Space")) {
 			sheep->move(frame);
 		}
 		sheep->update(frame);
@@ -238,7 +238,7 @@ void Game::update(int frame) {
 		}
 		else if (currentKeys.contains("B")) {
 			sword->reset();
-			updateGold(level);
+			gold = level;
 		}
 	}
 	if (room == "Level1") {
