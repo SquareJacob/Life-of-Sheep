@@ -11,7 +11,7 @@ public:
     ~Enemy();
     void damage(int dmg);
     //what to do when taking taking damage, returns if health <= 0
-    bool damaged();
+    bool damaged(int frame);
     //animation for defated, returns true when animation is done
     bool defeated(double frame);
     void prepare();
@@ -24,7 +24,7 @@ protected:
     Sword* sword;
     Sheep* sheep;
     int health, maxHealth;
-    bool beenDamaged = false;
+    int16_t immunity = 0, immunityFrames = 300;
     Bar* bar;
     TextArea* textArea;
     std::string text;

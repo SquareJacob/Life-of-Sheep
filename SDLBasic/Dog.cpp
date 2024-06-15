@@ -83,8 +83,8 @@ void Dog::update(double frame) {
 	}
 }
 
-bool Dog::damaged() {
-	bool result = Enemy::damaged();
+bool Dog::damaged(int frame) {
+	bool result = Enemy::damaged(frame);
 	if (behavior == 1) {
 		hits = realHits;
 	}

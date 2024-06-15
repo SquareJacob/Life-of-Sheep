@@ -26,9 +26,9 @@ void Enemy::damage(int dmg) {
 	}
 }
 
-bool Enemy::damaged() {
-	if (collided(sword) && sword->swordOut) {
-		if (!beenDamaged) {
+bool Enemy::damaged(int frame) {
+	if (immunity == 0 || sword->poking()) {
+		if (collided(sword) && sword->swordOut) {
 			health -= sword->damage();
 			health = health < 0 ? 0 : health;
 			bar->setValue(health);
@@ -41,13 +41,12 @@ bool Enemy::damaged() {
 			double deltaY = y - sheep->y;
 			double length = sqrt(deltaX * deltaX + deltaY * deltaY);
 			setKnockback(deltaX * (float)sheep->height / length * 5.0 * knock, deltaY * (float)sheep->height / length * 5.0 * knock, 50);
-			beenDamaged = true;
+			immunity = immunityFrames;
 			return health <= 0;
 		}
 	}
-	else {
-		beenDamaged = false;
-	}
+	immunity -= frame;
+	immunity = immunity < 0 ? 0 : immunity;
 	SDL_SetTextureColorMod(sprite->texture, 255, 255, 255);
 	return health <= 0;
 }

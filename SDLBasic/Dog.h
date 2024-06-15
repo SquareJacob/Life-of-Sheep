@@ -8,7 +8,7 @@ public:
     bool move(double vel);
     void prepare();
     void update(double frame);
-    bool damaged();
+    bool damaged(int frame);
 private:
     uint8_t behavior = 0; //0 = chase, 1 = staggered
     double speed;

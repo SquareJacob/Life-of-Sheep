@@ -48,7 +48,7 @@ GameObject* grass;
 
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
-	level = 2;
+	level = 0;
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0 && TTF_Init() == 0 && Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == 0) {
 		std::cout << "Subsystem initialized..." << std::endl;
 		//Get current display size
@@ -116,7 +116,7 @@ Game::Game(const char* title, bool fullscreen) {
 			chicken = new Chicken("assets/chicken.png", renderer, height / 15, 10000, sword, sheep, enemyBar, edge, yellow, red);
 			chicken->setBounds(edge);
 
-			horse = new Horse("assets/horse.png", renderer, height / 7, 12000, sword, sheep, enemyBar);
+			horse = new Horse("assets/horse.png", renderer, height / 7, 6000, sword, sheep, enemyBar);
 			horse->setBounds(edge);
 
 			cow = new Cow("assets/cow.png", renderer, height / 10, 1000, sword, sheep, enemyBar);
@@ -239,10 +239,11 @@ void Game::update(int frame) {
 		else if (currentKeys.contains("B")) {
 			sword->reset();
 			gold = level;
+			updateGold(0);
 		}
 	}
 	if (room == "Level1") {
-		if (!bull->damaged()) {
+		if (!bull->damaged(frame)) {
 			bull->update(frame);
 		}
 		else if (cow->ticker == -1) {
@@ -281,7 +282,7 @@ void Game::update(int frame) {
 		}
 	}
 	else if (room == "Level2") {
-		if (!dog->damaged()) {
+		if (!dog->damaged(frame)) {
 			dog->update(frame);
 		}
 		else if (cow->ticker == -1) {
@@ -320,7 +321,7 @@ void Game::update(int frame) {
 		}
 	}
 	else if (room == "Level3") {
-		if (!chicken->damaged()) {
+		if (!chicken->damaged(frame)) {
 			chicken->update(frame);
 		}
 		else if (cow->ticker == -1) {
@@ -359,7 +360,7 @@ void Game::update(int frame) {
 		}
 	}
 	else if (room == "Level4") {
-		if (!horse->damaged()) {
+		if (!horse->damaged(frame)) {
 			horse->update(frame);
 		}
 		else if (cow->ticker == -1) {

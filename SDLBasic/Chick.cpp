@@ -60,7 +60,7 @@ void Chick::update(double frame) {
 			}
 		}
 		damage(10 * stage);
-		if (damaged()) {
+		if (damaged(frame)) {
 			prepare();
 		}
 		stage += frame / 50000.0;
