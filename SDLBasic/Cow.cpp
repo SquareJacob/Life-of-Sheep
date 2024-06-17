@@ -38,11 +38,18 @@ void Cow::prepare() {
 	Enemy::prepare();
 	x = gameWidth / 2;
 	y = gameHeight / 2;
+	phase = 0;
+	boltsClear();
+	angle = 0;
+	flip = 0;
+	setSprite(0);
 	setOpacity(1);
 }
 
 void Cow::update(double frame) {
+	flip = 0;
 	if (phase == 1) {
+		angle = 0;
 		switch (behavior) {
 		case 0:
 			if (ticker == 0.0) {
@@ -69,6 +76,7 @@ void Cow::update(double frame) {
 		}
 	}
 	else {
+		angle = 15;
 		posBar();
 		switch (behavior) {
 		case 0:

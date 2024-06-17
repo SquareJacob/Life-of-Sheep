@@ -42,7 +42,8 @@ private:
 	int width;  //width of window
 	int height; //height of window
 	//porpotion of width and height meant for battle
-	double edge = 0.95;
+	double edge;
+	double originalEdge = 0.95;
 	//x-coord of topleft corner of battle
 	double battleX;
 	//y-coord of topleft corner of battle

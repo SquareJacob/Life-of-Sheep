@@ -63,6 +63,7 @@ std::vector<Hand*> hands;
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
 	level = 4;
+	edge = originalEdge;
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0 && TTF_Init() == 0 && Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == 0) {
 		std::cout << "Subsystem initialized..." << std::endl;
 		//Get current display size
@@ -234,7 +235,7 @@ void Game::update(int frame) {
 			prepare();
 			level -= 1;
 		}
-		if (cow->phase > 2) {
+		if (cow->phase > 2 && room.starts_with("Level")) {
 			sheep->posBar();
 			GameObject::globalX = sheep->x - width / 2;
 			GameObject::globalY = sheep->y - height / 2;
@@ -687,10 +688,9 @@ void Game::update(int frame) {
 						cow->phase++;
 						cutScene = false;
 						cutSceneFrame = 0;
-						cow->maxHealth = 15000;
-						cow->health = cow->maxHealth;
+						cow->health = 15000;
 						cow->bar = enemyBar2;
-						enemyBar2->setMax(cow->maxHealth);
+						enemyBar2->setMax(cow->health);
 						enemyBar2->setValue(cow->health);
 						sheep->bar = sheepBar2;
 						sheepBar2->setMax(sheep->maxHealth);
@@ -708,10 +708,9 @@ void Game::update(int frame) {
 					cow->phase++;
 					cutScene = false;
 					cutSceneFrame = 0;
-					cow->maxHealth = 15000;
-					cow->health = cow->maxHealth;
+					cow->health = 15000;
 					cow->bar = enemyBar2;
-					enemyBar2->setMax(cow->maxHealth);
+					enemyBar2->setMax(cow->health);
 					enemyBar2->setValue(cow->health);
 					cow->setSprite(1);
 					sheep->bar = sheepBar2;
@@ -872,6 +871,10 @@ int Game::getHeight() {
 void Game::prepare() {
 	Mix_FadeOutMusic(1000);
 	room = "Prepare";
+	GameObject::globalX = 0.0;
+	GameObject::globalY = 0.0;
+	grass->x = width / 2;
+	grass->y = height / 2;
 	sheep->x = 2 * sheep->width + 100;
 	sheep->y = 2 * sheep->height + 100;
 	sheep->width *= 4;
@@ -885,9 +888,9 @@ void Game::levelup() {
 	room = "Level";
 	room = room + std::to_string(level);
 	cow->ticker = 0;
-	sheep->prepare();
-	sword->prepare();
 	Mix_HaltMusic();
+	sheep->width /= 4;
+	sheep->height /= 4;
 	switch (level) {
 	case 1:
 		bull->prepare();
@@ -906,19 +909,19 @@ void Game::levelup() {
 		Mix_PlayMusic(horseMusic, -1);
 		break;
 	case 5:
+		edge = originalEdge;
+		cow->bar = enemyBar;
+		sheep->bar = sheepBar;
+		sheep->setBounds(edge);
 		cow->prepare();
-		switch (cow->phase) {
-		case 0:
-			cutScene = true;
-			break;
-		case 1:
-			Mix_PlayMusic(cow1Music, 1);
-			break;
-		case 3:
-			Mix_PlayMusic(cow2Music, -1);
+		cutScene = true;
+		for (auto h : hands) {
+			destroyHand(h);
 		}
-		break;
+		hands.clear();
 	}
+	sheep->prepare();
+	sword->prepare();
 }
 
 bool Game::updateGold(int amount) {

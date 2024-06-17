@@ -38,8 +38,6 @@ void Sheep::update(int frame) {
 }
 
 void Sheep::prepare() {
-	width /= 4;
-	height /= 4;
 	x = lowerX;
 	y = lowerY;
 	health = maxHealth;
