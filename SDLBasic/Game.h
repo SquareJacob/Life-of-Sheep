@@ -1,8 +1,10 @@
 #pragma once
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 #include <iostream>
 #include <set>
+#include "Hand.h"
 class Game
 {
 public:
@@ -25,10 +27,14 @@ public:
 	int getHeight();
 	//tries to update gold, without going negative, returns if successfully updated gold
 	bool updateGold(int amount);
+	Mix_Music* createMusic(const char* file);
 	//sends thee to the prepare room
 	void prepare();
 	//sends thee to the next level
 	void levelup();
+	void farmerSpeak(std::string text);
+	Hand* createHand(uint16_t height, int health);
+	void destroyHand(Hand* hand);
 private:
 	bool isRunning;
 	SDL_Window* window;

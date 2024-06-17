@@ -4,6 +4,7 @@
 #include <string>
 #include <cmath>
 #include <vector>
+#include <stdlib.h>
 #define PI 3.14159265
 #define QPI PI/4.0 //Quarter of PI
 #define TAU PI * 2
@@ -60,6 +61,8 @@ public:
 	void setSprite(uint8_t number);
 	void setKnockback(double x, double y, double time);
 	void knockback(double frame);
+	void clear();
+	void lookAt(GameObject* object);
 	int16_t width;
 	int16_t height;
 	int16_t cWidth, cHeight;
@@ -68,6 +71,8 @@ public:
 	double angle; //degrees
 	double radians;
 	uint8_t flip; //0 = no flip, 1 = horizontal, 2 = vertical
+	static std::vector<GameObject*> objects;
+	static double globalX, globalY;
 protected:
 	//prep function used in constructors
 	void objectize(uint16_t height);

@@ -20,13 +20,14 @@ public:
     bool takeDmg(int dmg);
     void update(int frame);
     void prepare();
+    void posBar();
     int maxHealth;
     int health;
+    Bar* bar;
 private:
     double speed; //movespeed porpotion
     double aSpeed; //rotation speed porpotion
     int immunityFrames = 500; //ms of immunity
     int immunity = 0;
-    Bar* bar; //healthBar
 };
 

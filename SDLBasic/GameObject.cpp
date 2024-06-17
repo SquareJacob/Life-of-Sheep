@@ -14,6 +14,7 @@ void GameObject::objectize(uint16_t height) {
 	y = height * 0.5;
 	SDL_GetRendererOutputSize(sprite->renderer, &gameWidth, &gameHeight);
 	setBounds();
+	objects.push_back(this);
 }
 
 GameObject::GameObject(SDL_Surface* surface, SDL_Renderer* renderer, uint16_t height) {
@@ -39,7 +40,7 @@ GameObject::GameObject(std::string text, std::string font, int size, SDL_Color f
 GameObject::~GameObject() {}
 
 void GameObject::render() {
-	sprite->place(x - width / 2, y - height / 2, width, height, angle, flip);
+	sprite->place(x - width / 2 - globalX, y - height / 2 - globalY, width, height, angle, flip);
 }
 
 double GameObject::setRadians() {
@@ -256,9 +257,31 @@ void GameObject::knockback(double frame) {
 	}
 }
 
+void GameObject::clear() {
+	for (auto s : sprites) {
+		SDL_DestroyTexture(s->texture);
+	}
+}
+
+void GameObject::lookAt(GameObject* object) {
+	angle = atan2(y - object->y, object->x - x) * 180.0 / PI;
+	if (angle < 0) {
+		angle += 360.0;
+	}
+	if (90 < angle && angle < 270) {
+		flip = 2;
+	}
+	else {
+		flip = 0;
+	}
+}
+
 double GameObject::c = 0.0;
 double GameObject::s = 0.0;
+double GameObject::globalX = 0.0;
+double GameObject::globalY = 0.0;
 std::vector<double> GameObject::corners(8);
 std::vector<double> GameObject::uVectors(4);
 std::vector<double> GameObject::distances(4);
+std::vector<GameObject*> GameObject::objects;
 

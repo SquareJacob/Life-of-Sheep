@@ -5,6 +5,7 @@ namespace fs = std::filesystem;
 
 Game* game = nullptr;
 int main(int argc, char* argv[]) {
+	srand(time(0));
 	std::cout << "Current path is " << fs::current_path() << '\n';
 	const int FPS = 60;
 	const int frameDelay = 1000 / FPS;

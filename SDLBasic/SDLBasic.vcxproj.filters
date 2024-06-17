@@ -78,6 +78,9 @@
     <ClCompile Include="Horse.cpp">
       <Filter>src\Enemies</Filter>
     </ClCompile>
+    <ClCompile Include="Hand.cpp">
+      <Filter>src\Enemies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enemy.h">
@@ -122,6 +125,9 @@
     <ClInclude Include="Horse.h">
       <Filter>Header Files\Enemies</Filter>
     </ClInclude>
+    <ClInclude Include="Hand.h">
+      <Filter>Header Files\Enemies</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\sheep1.png">
@@ -154,6 +160,15 @@
     <Image Include="assets\horse.png">
       <Filter>assets</Filter>
     </Image>
+    <Image Include="assets\hand.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\cow1.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\flame.png">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\A sheepish menu.ogg">
@@ -172,6 +187,12 @@
       <Filter>assets</Filter>
     </None>
     <None Include="assets\horsin%27 around.ogg">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\YET TO BE FORGOTTEN.ogg">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\a magic cow.ogg">
       <Filter>assets</Filter>
     </None>
   </ItemGroup>

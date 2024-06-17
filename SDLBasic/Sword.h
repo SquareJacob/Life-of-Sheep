@@ -32,6 +32,7 @@ public:
     bool swinging();
     int damage();
     void reset();
+    void prepare();
     bool swordOut = false;
 private:
     double speed = 0.15; //porpotional to speed of swing

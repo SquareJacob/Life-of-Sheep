@@ -90,3 +90,8 @@ void Sword::reset() {
 	pokeTime = basePokeTime;
 	sDmg = sBaseDmg;
 }
+
+void Sword::prepare() {
+	poke = 0;
+	sAngle = 0;
+}

@@ -15,15 +15,26 @@ Enemy::Enemy(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, in
 Enemy::~Enemy() {}
 
 
-void Enemy::damage(int dmg) {
-	if (collided(sheep)) {
-		if (sheep->takeDmg(dmg)) {
-			double deltaX = sheep->x - x;
-			double deltaY = sheep->y - y;
-			double length = sqrt(deltaX * deltaX + deltaY * deltaY);
-			sheep->setKnockback(deltaX * (float)sheep->height / length * 10.0, deltaY * (float)sheep->height / length * 10.0, 100);
+bool Enemy::damage(int dmg, Enemy* object) {
+	if (object == NULL) {
+		if (collided(sheep)) {
+			if (sheep->takeDmg(dmg)) {
+				double deltaX = sheep->x - x;
+				double deltaY = sheep->y - y;
+				double length = sqrt(deltaX * deltaX + deltaY * deltaY);
+				sheep->setKnockback(deltaX * (float)sheep->height / length * 10.0, deltaY * (float)sheep->height / length * 10.0, 100);
+				return true;
+			}
 		}
 	}
+	else {
+		if (collided(object)) {
+			object->health -= dmg;
+			object->bar->setValue(object->health);
+			return true;
+		}
+	}
+	return false;
 }
 
 bool Enemy::damaged(int frame) {
@@ -83,15 +94,6 @@ void Enemy::speak(std::string text) {
 	textArea->y = y + (textArea->height + height) / 2;
 }
 
-void Enemy::lookAt(GameObject* object) {
-	angle = atan2(y - object->y, object->x - x) * 180.0 / PI;
-	if (angle < 0) {
-		angle += 360.0;
-	}
-	if (90 < angle && angle < 270) {
-		flip = 2;
-	}
-	else {
-		flip = 0;
-	}
+void Enemy::posBar() {
+	bar->updatePos(x - width / 2 - GameObject::globalX, y + height / 2 - GameObject::globalY);
 }

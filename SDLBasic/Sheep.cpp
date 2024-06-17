@@ -46,3 +46,7 @@ void Sheep::prepare() {
 	bar->setValue(health);
 	setKnockback(0.0, 0.0, 0.0);
 }
+
+void Sheep::posBar() {
+	bar->updatePos(x - width / 2 - GameObject::globalX, y + height / 2 - GameObject::globalY);
+}

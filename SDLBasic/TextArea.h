@@ -23,9 +23,9 @@ public:
 	TextArea(std::string text, std::string font, int size, SDL_Color fg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height);
 	~TextArea();
 	void changeText(std::string);
+	std::string text;
 protected:
 	void retext();
-	std::string text;
 	std::string font;
 	int size;
 	SDL_Color fg, bg;

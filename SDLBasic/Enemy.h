@@ -9,7 +9,7 @@ class Enemy :
 public:
     Enemy(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar);
     ~Enemy();
-    void damage(int dmg);
+    bool damage(int dmg, Enemy* object = NULL);
     //what to do when taking taking damage, returns if health <= 0
     bool damaged(int frame);
     //animation for defated, returns true when animation is done
@@ -17,15 +17,15 @@ public:
     void prepare();
     void speak(std::string text);
     void render();
-    void lookAt(GameObject* object);
     double ticker = 0;
+    Bar* bar;
+    int health, maxHealth;
+    void posBar();
 protected:
     double knock = 0.0;
     Sword* sword;
     Sheep* sheep;
-    int health, maxHealth;
     int16_t immunity = 0, immunityFrames = 300;
-    Bar* bar;
     TextArea* textArea;
     std::string text;
     int hits = 0;
