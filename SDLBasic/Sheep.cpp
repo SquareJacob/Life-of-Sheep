@@ -48,3 +48,4 @@ void Sheep::prepare() {
 void Sheep::posBar() {
 	bar->updatePos(x - width / 2 - GameObject::globalX, y + height / 2 - GameObject::globalY);
 }
+ 
