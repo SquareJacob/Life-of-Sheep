@@ -23,6 +23,7 @@ public:
     void posBar();
 protected:
     double knock = 0.0;
+    bool poked = false;
     Sword* sword;
     Sheep* sheep;
     int16_t immunity = 0, immunityFrames = 300;

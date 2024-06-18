@@ -686,9 +686,10 @@ void Game::update(int frame) {
 					cow->speak("AND I WILL NOT BE FORGOTEEN");
 					if (currentKeys.contains("Return")) {
 						cow->phase++;
+						cow->ticker = 0;
 						cutScene = false;
 						cutSceneFrame = 0;
-						cow->health = 15000;
+						cow->health = cow->maxHealth2;
 						cow->bar = enemyBar2;
 						enemyBar2->setMax(cow->health);
 						enemyBar2->setValue(cow->health);
@@ -706,9 +707,10 @@ void Game::update(int frame) {
 					}
 					hands.clear();
 					cow->phase++;
+					cow->ticker = 0;
 					cutScene = false;
 					cutSceneFrame = 0;
-					cow->health = 15000;
+					cow->health = cow->maxHealth2;
 					cow->bar = enemyBar2;
 					enemyBar2->setMax(cow->health);
 					enemyBar2->setValue(cow->health);
@@ -719,7 +721,6 @@ void Game::update(int frame) {
 					sheep->setBounds(10000.0);
 					Mix_PlayMusic(cow2Music, -1);
 				}
-
 				break;
 			case 3:
 				if (!cow->damaged(frame)) {
@@ -737,6 +738,7 @@ void Game::update(int frame) {
 							cow->x += (float)(hands[i]->height * frame) / 1000.0;
 						}
 						hands[i]->damage(hands[i]->height * 75 / height);
+						hands[i]->damage(hands[i]->height * 75 / height, cow);
 						if (hands[i]->collided(sword) && sword->swordOut) {
 							destroyHand(hands[i]);
 							hands.erase(std::next(hands.begin(), i));
@@ -811,6 +813,7 @@ void Game::render() {
 		}
 		if (level < 5) {
 			cow->render();
+			enemyBar->render();
 			//render edge of battlefield
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 			SDL_RenderDrawLine(renderer, battleX, battleY, battleX + edge * width, battleY);
@@ -913,6 +916,10 @@ void Game::levelup() {
 		cow->bar = enemyBar;
 		sheep->bar = sheepBar;
 		sheep->setBounds(edge);
+		battleX = (1 - edge) / 2.0 * width;
+		battleY = (1 - edge) / 2.0 * height;
+		sheepBar->updatePos(0, 0);
+		enemyBar->updatePos(width - enemyBar->getHeight(), 0);
 		cow->prepare();
 		cutScene = true;
 		for (auto h : hands) {

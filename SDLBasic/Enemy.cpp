@@ -38,7 +38,7 @@ bool Enemy::damage(int dmg, Enemy* object) {
 }
 
 bool Enemy::damaged(int frame) {
-	if (immunity == 0 || sword->poking()) {
+	if (immunity == 0 || (sword->poking() && !poked)) {
 		if (collided(sword) && sword->swordOut) {
 			health -= sword->damage();
 			health = health < 0 ? 0 : health;
@@ -48,6 +48,7 @@ bool Enemy::damaged(int frame) {
 				ticker = 0;
 			}
 			SDL_SetTextureColorMod(sprite->texture, 1, 1, 1);
+			poked = true;
 			double deltaX = x - sheep->x;
 			double deltaY = y - sheep->y;
 			double length = sqrt(deltaX * deltaX + deltaY * deltaY);
@@ -55,6 +56,9 @@ bool Enemy::damaged(int frame) {
 			immunity = immunityFrames;
 			return health <= 0;
 		}
+	}
+	else if (!sword->poking()) {
+		poked = false;
 	}
 	immunity -= frame;
 	immunity = immunity < 0 ? 0 : immunity;

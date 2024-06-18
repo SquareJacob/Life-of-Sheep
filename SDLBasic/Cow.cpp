@@ -81,17 +81,18 @@ void Cow::update(double frame) {
 		switch (behavior) {
 		case 0:
 			if (ticker == 0.0) {
-				if (wiggle(-frame)) {
+				if (wiggle(-frame * (2.0 - (float) health / (float) maxHealth2))) {
 					ticker++;
 				}
 			}
 			else if (ticker == 1.0) {
-				x = sheep->x + rand() % gameWidth - gameWidth / 2;
-				y = sheep->y + rand() % gameHeight - gameHeight / 2;
+				int a = rand();
+				x = sheep->x + height * 3 * cos(a);
+				y = sheep->y + height * 3 * sin(a);
 				ticker++;
 			}
 			else {
-				if (wiggle(frame)) {
+				if (wiggle(frame * (2.0 - (float) health / (float) maxHealth2))) {
 					Bolt* b = new Bolt("assets/flame.png", sprite->renderer, height / 3.0, 1, sword, sheep, NULL, this);
 					b->x = x;
 					b->y = y;
@@ -149,7 +150,7 @@ bool Cow::Bolt::update(double frame) {
 			return true;
 		}
 	}
-	if (damage(10)) {
+	if (damage(cow->phase * 10)) {
 		return true;
 	}
 	if (ticker > 0.5) {
