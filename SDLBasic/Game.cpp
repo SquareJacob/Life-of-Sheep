@@ -78,7 +78,7 @@ int x = 0, y = 0;
 
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
-	level = 3;
+	level = 0;
 	edge = originalEdge;
 	mouseX = &x;
 	mouseY = &y;
