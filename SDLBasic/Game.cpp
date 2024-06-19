@@ -1,3 +1,10 @@
+/**
+* TODO:
+* -Fix cow phase 1 not shooting on edge
+* -Fix cow going invisible in cutscene 2
+* -Fix sheep blocking text
+**/
+
 #include "Game.h"
 #include "GameObject.h"
 #include "Sheep.h"
@@ -71,7 +78,7 @@ int x = 0, y = 0;
 
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
-	level = 0;
+	level = 3;
 	edge = originalEdge;
 	mouseX = &x;
 	mouseY = &y;
@@ -338,7 +345,11 @@ void Game::update(int frame) {
 		else if (currentKeys.contains("B")) {
 			sword->reset();
 			gold = level;
+			swingUpgrades = 0;
+			pokeUpgrades = 0;
 			updateGold(0);
+			updateSwing(0);
+			updatePoke(0);
 		}
 	}
 	if (room.starts_with("Level")) {
