@@ -9,6 +9,7 @@
 #include "Dog.h"
 #include "Chicken.h"
 #include "Horse.h"
+#include "Button.h"
 
 Sheep* sheep;
 const int sheepBaseHealth = 300;
@@ -27,6 +28,11 @@ TextArea* titleText;
 TextArea* upgradeText;
 TextArea* goldText;
 
+int maxUpgrades = 3;
+Button* upgradePoke;
+int pokeUpgrades = 0;
+Button* upgradeSwing;
+int swingUpgrades = 0;
 
 TextArea* farmerText;
 double farmerShake;
@@ -60,10 +66,17 @@ uint8_t cutSceneFrame = 0;
 
 std::vector<Hand*> hands;
 
+double radius;
+int x = 0, y = 0;
+
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
-	level = 4;
+	level = 0;
 	edge = originalEdge;
+	mouseX = &x;
+	mouseY = &y;
+	buttons = new std::set<int>();
+	currentButtons = new std::set<int>();
 	if (SDL_Init(SDL_INIT_EVERYTHING) == 0 && TTF_Init() == 0 && Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == 0) {
 		std::cout << "Subsystem initialized..." << std::endl;
 		//Get current display size
@@ -73,6 +86,7 @@ Game::Game(const char* title, bool fullscreen) {
 		}
 		width = DM.w;
 		height = DM.h;
+		radius = width > height ? width : height;
 		battleX = (1 - edge) / 2.0 * width;
 		battleY = (1 - edge) / 2.0 * height;
 		//Create window
@@ -103,11 +117,19 @@ Game::Game(const char* title, bool fullscreen) {
 			titleText->x = width / 2;
 			titleText->y = height / 2;
 
-			upgradeText = new TextArea("Press N to upgrade poke speed, M to upgrade swing damage, each costing 1 gold. Press B to reset gold and upgrades", "BlackRunters", 250, black, yellow, 2000, renderer, height / 3);
+			upgradeText = new TextArea("Press B to reset gold and upgrades", "BlackRunters", 250, black, yellow, 1000, renderer, height / 3);
 			upgradeText->y = height - upgradeText->height / 2;
 
-			goldText = new TextArea("Gold :" + std::to_string(gold), "BlackRunters", 250, yellow, black, 10000, renderer, height / 10);
+			goldText = new TextArea("", "BlackRunters", 250, yellow, black, 10000, renderer, height / 10);
 			updateGold(level);
+
+			upgradePoke = new Button("", "BlackRunters", 250, black, yellow, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
+			upgradePoke->y = goldText->height + upgradePoke->height / 2;
+			updatePoke(0);
+
+			upgradeSwing = new Button("", "BlackRunters", 250, black, yellow, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
+			upgradeSwing->y = upgradePoke->y + upgradeSwing->height;
+			updateSwing(0);
 
 			farmerText = new TextArea("", "BlackRunters", 250, red, 10000, renderer, height / 5);
 			farmerText->angle = -10;
@@ -143,7 +165,7 @@ Game::Game(const char* title, bool fullscreen) {
 			chicken = new Chicken("assets/chicken.png", renderer, height / 15, 10000, sword, sheep, enemyBar, edge, yellow, red);
 			chicken->setBounds(edge);
 
-			horse = new Horse("assets/horse.png", renderer, height / 7, 6000, sword, sheep, enemyBar);
+			horse = new Horse("assets/horse.png", renderer, height / 7, 9000, sword, sheep, enemyBar);
 			horse->setBounds(edge);
 
 			cow = new Cow("assets/cow.png", renderer, height / 10, 1000, sword, sheep, enemyBar, edge);
@@ -168,6 +190,9 @@ void Game::handleEvents() {
 	for (std::string i : keys) {
 		currentKeys.erase(i);
 	}
+	for (int i : *buttons) {
+		currentButtons->erase(i);
+	}
 	while (SDL_PollEvent(&event)) {
 		switch (event.type) {
 		case SDL_QUIT:
@@ -184,11 +209,26 @@ void Game::handleEvents() {
 			break;
 		case SDL_WINDOWEVENT:
 			break;
+		case SDL_MOUSEMOTION:
+			x = event.motion.x;
+			y = event.motion.y;
+			//std::cout << *mouseX << ' ' << *mouseY << std::endl;
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			if (!buttons->contains(event.button.button)) {
+				currentButtons->insert(event.button.button);
+			}
+			buttons->insert(event.button.button);
+			break;
+		case SDL_MOUSEBUTTONUP:
+			buttons->erase(event.button.button);
+			break;
 		}
 	}
 }
 
 void Game::update(int frame) {
+	//std::cout << *mouseX << ' ' << *mouseY << ' ' << upgradePoke->hovered() << std::endl;
 	if (room != "Menu" && room != "Prepare" && !cutScene) {
 		//Sheep update
 		if (keys.contains("W")) {
@@ -275,14 +315,24 @@ void Game::update(int frame) {
 		if (currentKeys.contains("Return")) {
 			levelup();
 		}
-		if (currentKeys.contains("N")) {
+		if (upgradePoke->clicked()) {
 			if (updateGold(-1)) {
-				sword->updatePokeTime();
+				if (updatePoke(1)) {
+					sword->updatePokeTime();
+				}
+				else {
+					updateGold(1);
+				}
 			}
 		}
-		else if (currentKeys.contains("M")) {
+		else if (upgradeSwing->clicked()) {
 			if (updateGold(-1)) {
-				sword->updateSwingDmg();
+				if (updateSwing(1)) {
+					sword->updateSwingDmg();
+				}
+				else {
+					updateGold(1);
+				}
 			}
 		}
 		else if (currentKeys.contains("B")) {
@@ -620,18 +670,18 @@ void Game::update(int frame) {
 					break;
 				case 11:
 					GameObject::globalY = 0.0;
-					for (int i = 0; i < 5; i++) {
+					for (int i = 0; i < 8; i++) {
 						hands.push_back(createHand(height / 30.0, 1));
-						hands[i]->x =  width + hands[i]->width;
-						hands[i]->y = (float)height * (0.1 + 0.2 * (float) i);
-						hands[i]->angle = 180;
+						hands[i]->x = radius * cos(QPI * i) + cow->x;
+						hands[i]->y = radius * sin(QPI * i) + cow->y;
+						hands[i]->lookAt(cow);
 					}
 					cutSceneFrame++;
 					break;
 				case 12:
 					cow->speak("no...");
 					for (auto h : hands) {
-						h->moveTowards(cow, frame);
+						h->moveTowards(cow, 3.0 * frame);
 					}
 					if (currentKeys.contains("Return")) {
 						cutSceneFrame++;
@@ -641,7 +691,7 @@ void Game::update(int frame) {
 					cow->angle = 15;
 					cow->speak("NO...");
 					for (auto h : hands) {
-						h->moveTowards(cow, frame);
+						h->moveTowards(cow, 3.0 * frame);
 					}
 					if (currentKeys.contains("Return")) {
 						cutSceneFrame++;
@@ -660,7 +710,7 @@ void Game::update(int frame) {
 					enemyBar->updatePos(battleX + edge * width, 0);
 					cow->speak("NO!!!");
 					for (auto h : hands) {
-						h->x += (float)(frame * height) / 1000.0;
+						h->moveTowards(cow, -5.0 * frame);
 					}
 					if (edge > 1.0) {
 						cow->lookAt(sheep);
@@ -726,10 +776,10 @@ void Game::update(int frame) {
 				if (!cow->damaged(frame)) {
 					cow->update(frame);
 					if (rand() % 100 == 99) {
-						int he = rand() % 30 + 15;
-						Hand* h = createHand(height / (he), 1);
-						h->x = width + GameObject::globalX + h->width * 2;
-						h->y = GameObject::globalY + height * (rand() % 1000) / 1000;
+						int r = rand();
+						Hand* h = createHand(height / (r % 30 + 15), 1);
+						h->x = radius * cos(r) + GameObject::globalX;
+						h->y = radius * sin(r) + GameObject::globalY;
 						hands.push_back(h);
 					}
 					int size = hands.size();
@@ -784,6 +834,8 @@ void Game::render() {
 		progressText->render();
 		upgradeText->render();
 		goldText->render();
+		upgradePoke->render();
+		upgradeSwing->render();
 	}
 	if (room.starts_with("Level")) {
 		switch (level) {
@@ -825,6 +877,7 @@ void Game::render() {
 	}
 	if (room != "Menu") {
 		sheep->render();
+		//std::cout << sheep->inArea(*mouseX, *mouseY) << std::endl;
 		if (room != "Prepare") {
 			sword->renderSwing();
 		}
@@ -878,8 +931,8 @@ void Game::prepare() {
 	GameObject::globalY = 0.0;
 	grass->x = width / 2;
 	grass->y = height / 2;
-	sheep->x = 2 * sheep->width + 100;
-	sheep->y = 2 * sheep->height + 100;
+	sheep->x = 3 * sheep->width;
+	sheep->y = 3 * sheep->height;
 	sheep->width *= 4;
 	sheep->height *= 4;
 	sheep->flip = 0;
@@ -939,6 +992,32 @@ bool Game::updateGold(int amount) {
 	}
 	else {
 		gold -= amount;
+		return false;
+	}
+	return true;
+}
+
+bool Game::updatePoke(int amount) {
+	pokeUpgrades += amount;
+	if (pokeUpgrades <= maxUpgrades) {
+		upgradePoke->changeText("Poke: " + std::to_string(pokeUpgrades) + "/" + std::to_string(maxUpgrades));
+		upgradePoke->x = width - upgradePoke->width / 2;
+	}
+	else {
+		pokeUpgrades -= amount;
+		return false;
+	}
+	return true;
+}
+
+bool Game::updateSwing(int amount) {
+	swingUpgrades += amount;
+	if (swingUpgrades <= maxUpgrades) {
+		upgradeSwing->changeText("Swing: " + std::to_string(swingUpgrades) + "/" + std::to_string(maxUpgrades));
+		upgradeSwing->x = width - upgradeSwing->width / 2;
+	}
+	else {
+		swingUpgrades -= amount;
 		return false;
 	}
 	return true;

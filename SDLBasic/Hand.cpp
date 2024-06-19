@@ -6,14 +6,14 @@ Hand::Hand(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int 
 }
 
 bool Hand::moveTowards(GameObject* object, double frame) {
-	if (collided(object)) {
+	if (collided(object) && frame > 0) {
 		return true;
 	}
 	oAngle = atan2(y - object->y, object->x - x) * 180.0 / PI;
 	if (oAngle < 0) {
 		oAngle += 360.0;
 	}
-	if (abs(oAngle - angle) < frame * aSpeed) {
+	if (abs(oAngle - angle) < abs(frame * aSpeed)) {
 		angle = oAngle;
 	}
 	else if (oAngle < angle) {

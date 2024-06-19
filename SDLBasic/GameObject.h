@@ -4,6 +4,7 @@
 #include <string>
 #include <cmath>
 #include <vector>
+#include <set>
 #include <stdlib.h>
 #define PI 3.14159265
 #define QPI PI/4.0 //Quarter of PI
@@ -57,7 +58,9 @@ public:
 	void renderHitBox(int r, int g, int b);
 	//check collision
 	bool collided(GameObject* object, bool talk = false);
+	bool inArea(double x, double y, bool talk = false);
 	void addSprite(const char* file);
+	void addSprite(SDL_Surface* surface);
 	void setSprite(uint8_t number);
 	void setKnockback(double x, double y, double time);
 	void knockback(double frame);

@@ -81,6 +81,9 @@
     <ClCompile Include="Hand.cpp">
       <Filter>src\Enemies</Filter>
     </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>src\Generics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enemy.h">
@@ -127,6 +130,9 @@
     </ClInclude>
     <ClInclude Include="Hand.h">
       <Filter>Header Files\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>Header Files\Generics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

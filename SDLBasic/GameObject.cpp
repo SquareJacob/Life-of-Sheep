@@ -228,8 +228,17 @@ bool GameObject::collided(GameObject* object, bool talk) {
 	return intersections == 4;
 }
 
+bool GameObject::inArea(double x, double y, bool talk) {
+	//https://www.desmos.com/calculator/jliewo9rd0
+	return (abs((y - this->y) * cos(angle) - (x - this->x) * sin(angle)) < height / 2) && (abs((x - this->x) * cos(angle) + (y - this->y) * sin(angle)) < width / 2);
+}
+
 void GameObject::addSprite(const char* file) {
 	sprites.push_back(new Sprite(file, sprite->renderer));
+}
+
+void GameObject::addSprite(SDL_Surface* surface) {
+	sprites.push_back(new Sprite(surface, sprite->renderer));
 }
 
 void GameObject::setSprite(uint8_t number) {

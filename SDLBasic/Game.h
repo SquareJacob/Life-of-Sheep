@@ -3,7 +3,6 @@
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <iostream>
-#include <set>
 #include "Hand.h"
 class Game
 {
@@ -27,6 +26,8 @@ public:
 	int getHeight();
 	//tries to update gold, without going negative, returns if successfully updated gold
 	bool updateGold(int amount);
+	bool updatePoke(int amount);
+	bool updateSwing(int amount);
 	Mix_Music* createMusic(const char* file);
 	//sends thee to the prepare room
 	void prepare();
@@ -51,6 +52,10 @@ private:
 	SDL_Event event;
 	std::set<std::string> keys; //set of keys currently
 	std::set<std::string> currentKeys;
+	int* mouseX;
+	int* mouseY;
+	std::set<int>* buttons;
+	std::set<int>* currentButtons;
 	std::string room; //Menu, Prepare, Level[1-10]
 	int level; //current level
 };
