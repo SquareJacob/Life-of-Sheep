@@ -10,12 +10,12 @@ Cow::Cow(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int he
 
 void Cow::setOpacity(double o) {
 	opacity = o;
-	SDL_SetTextureAlphaMod(sprite->texture, opacity * 255);
+	GameObject::setOpacity(opacity);
 }
 
 void Cow::updateOpacity(double o) {
 	opacity += o;
-	SDL_SetTextureAlphaMod(sprite->texture, opacity * 255);
+	GameObject::setOpacity(opacity);
 }
 
 bool Cow::wiggle(double frame) {
@@ -139,7 +139,7 @@ Cow::Bolt::Bolt(const char* spriteFile, SDL_Renderer* renderer, uint16_t height,
 }
 
 bool Cow::Bolt::update(double frame) {
-	if (cow->phase == 1) {
+	if (cow->phase == 1 && ticker > 0.4) {
 		if (shift(frame * speed)) {
 			return true;
 		}
@@ -153,7 +153,7 @@ bool Cow::Bolt::update(double frame) {
 	if (damage(cow->phase * 10)) {
 		return true;
 	}
-	if (ticker > 0.5) {
+	if (ticker > 0.4) {
 		if (damage(100, cow)) {
 			return true;
 		}

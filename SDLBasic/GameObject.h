@@ -9,6 +9,12 @@
 #define PI 3.14159265
 #define QPI PI/4.0 //Quarter of PI
 #define TAU PI * 2
+#define  red SDL_Color{ 191, 33, 47 }
+#define black SDL_Color{ 0, 0, 0 }
+#define green SDL_Color{ 0, 111, 60 }
+#define blue SDL_Color{ 37, 75, 150 }
+#define yellow SDL_Color{ 250, 167, 63 }
+#define white SDL_Color{ 255, 255, 255 }
 //Should be subclassed into specific objects
 class GameObject
 {
@@ -63,9 +69,12 @@ public:
 	void addSprite(SDL_Surface* surface);
 	void setSprite(uint8_t number);
 	void setKnockback(double x, double y, double time);
-	void knockback(double frame);
+	void knockback(double frame, bool bound = true);
 	void clear();
 	void lookAt(GameObject* object);
+	//0 = invisible, 1 = visible; changes only current sprite
+	void setOpacity(double o);
+	void turnTowards(GameObject* object, double amount);
 	int16_t width;
 	int16_t height;
 	int16_t cWidth, cHeight;

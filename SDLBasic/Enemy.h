@@ -17,10 +17,12 @@ public:
     void prepare();
     void speak(std::string text);
     void render();
+    void posBar();
     double ticker = 0;
+    void clear();
     Bar* bar;
     int health, maxHealth;
-    void posBar();
+    static std::vector<Enemy*> enemies;
 protected:
     double knock = 0.0;
     bool poked = false;

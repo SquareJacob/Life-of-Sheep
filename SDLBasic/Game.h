@@ -28,6 +28,7 @@ public:
 	bool updateGold(int amount);
 	bool updatePoke(int amount);
 	bool updateSwing(int amount);
+	bool updateFling(int amount);
 	Mix_Music* createMusic(const char* file);
 	//sends thee to the prepare room
 	void prepare();
@@ -36,6 +37,7 @@ public:
 	void farmerSpeak(std::string text);
 	Hand* createHand(uint16_t height, int health);
 	void destroyHand(Hand* hand);
+	void drawCircle(int x, int y, int radius);
 private:
 	bool isRunning;
 	SDL_Window* window;
@@ -58,5 +60,7 @@ private:
 	std::set<int>* currentButtons;
 	std::string room; //Menu, Prepare, Level[1-10]
 	int level; //current level
+	double ticker = 0.0;
+	bool paused = false;
 };
 

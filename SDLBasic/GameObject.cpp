@@ -230,7 +230,7 @@ bool GameObject::collided(GameObject* object, bool talk) {
 
 bool GameObject::inArea(double x, double y, bool talk) {
 	//https://www.desmos.com/calculator/jliewo9rd0
-	return (abs((y - this->y) * cos(angle) - (x - this->x) * sin(angle)) < height / 2) && (abs((x - this->x) * cos(angle) + (y - this->y) * sin(angle)) < width / 2);
+	return (abs((y - this->y + globalY) * cos(angle) - (x - this->x + globalX) * sin(angle)) < height / 2) && (abs((x - this->x + globalX) * cos(angle) + (y - this->y + globalY) * sin(angle)) < width / 2);
 }
 
 void GameObject::addSprite(const char* file) {
@@ -252,11 +252,11 @@ void GameObject::setKnockback(double x, double y, double time) {
 	knockTime = time;
 }
 
-void GameObject::knockback(double frame) {
+void GameObject::knockback(double frame, bool bound) {
 	if (knockTime > 0.0) {
 		x += knockX * frame / 1000.0;
 		y += knockY * frame / 1000.0;
-		if (bound()) {
+		if (bound && this->bound()) {
 			knockTime = 0.0;
 		}
 		else {
@@ -270,6 +270,7 @@ void GameObject::clear() {
 	for (auto s : sprites) {
 		SDL_DestroyTexture(s->texture);
 	}
+	objects.erase(std::find(objects.begin(), objects.end(), this));
 }
 
 void GameObject::lookAt(GameObject* object) {
@@ -282,6 +283,44 @@ void GameObject::lookAt(GameObject* object) {
 	}
 	else {
 		flip = 0;
+	}
+}
+
+void GameObject::setOpacity(double o) {
+	if (SDL_SetTextureAlphaMod(sprite->texture, o * 255) != 0) {
+		std::cout << SDL_GetError() << std::endl;
+	}
+}
+
+void GameObject::turnTowards(GameObject* object, double amount) {
+	double oAngle = atan2(y - object->y, object->x - x) * 180.0 / PI;
+	if (oAngle < 0) {
+		oAngle += 360.0;
+	}
+	if (abs(oAngle - angle) < abs(amount)) {
+		angle = oAngle;
+	}
+	else if (oAngle < angle) {
+		if (angle - oAngle < 180.0) {
+			angle -= amount;
+		}
+		else {
+			angle += amount;
+			if (angle > 360) {
+				angle -= 360;
+			}
+		}
+	}
+	else {
+		if (oAngle - angle < 180.0) {
+			angle += amount;
+		}
+		else {
+			angle -= amount;
+			if (angle < 0) {
+				angle += 360;
+			}
+		}
 	}
 }
 

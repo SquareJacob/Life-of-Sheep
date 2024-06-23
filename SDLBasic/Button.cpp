@@ -19,10 +19,11 @@ bool Button::clicked() {
 void Button::render() {
 	if (hovered()) {
 		if (buttons->contains(1)) {
-			SDL_SetTextureColorMod(sprite->texture, 1, 1, 1);;
+			SDL_SetTextureColorMod(sprite->texture, 1, 1, 1);
 		}
 		else {
 			SDL_SetTextureAlphaMod(sprite->texture, 127);
+			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND));
 		}
 	}
 	GameObject::render();

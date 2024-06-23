@@ -34,11 +34,13 @@ public:
     void reset();
     void prepare();
     bool swordOut = false;
+    bool flying = false;
 private:
-    double speed = 0.15; //porpotional to speed of swing
+    double fSpeed, fBaseSpeed = 0.1;
+    double speed = 0.3; //porpotional to speed of swing
     double sAngle = 0.0; //sheep Angle
     double swordAngle = 0.0; //sword Angle relative to sheep
-    uint16_t pokeTime, pDmg = 20, sDmg, sBaseDmg = 80, basePokeTime = 220;
+    uint16_t pokeTime, pDmg = 20, sDmg, sBaseDmg = 40, basePokeTime = 220, fDmg = 300;
     int16_t poke = 0;
     double upgrade = 1.1;
     int sheepWidth; //actually sheepWidth/2; useful constant

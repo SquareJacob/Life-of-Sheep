@@ -1,8 +1,7 @@
 /**
 * TODO:
-* -Fix cow phase 1 not shooting on edge
-* -Fix cow going invisible in cutscene 2
-* -Fix sheep blocking text
+* -"Text has zero width"
+* -Reset button
 **/
 
 #include "Game.h"
@@ -17,29 +16,27 @@
 #include "Chicken.h"
 #include "Horse.h"
 #include "Button.h"
+#include "Wolf.h"
 
 Sheep* sheep;
 const int sheepBaseHealth = 300;
 int gold = 0;
 
 Sword* sword;
-
-SDL_Color red = { 191, 33, 47 };
-SDL_Color black = { 0, 0, 0 };
-SDL_Color green = { 0, 111, 60 };
-SDL_Color blue = { 37, 75, 150 };
-SDL_Color yellow = { 250, 167, 63 };
+int flyDistance;
 
 TextArea* progressText;
 TextArea* titleText;
 TextArea* upgradeText;
-TextArea* goldText;
 
+TextArea* goldText;
 int maxUpgrades = 3;
 Button* upgradePoke;
 int pokeUpgrades = 0;
 Button* upgradeSwing;
 int swingUpgrades = 0;
+Button* upgradeFling;
+int flingUpgrades = 0;
 
 TextArea* farmerText;
 double farmerShake;
@@ -49,6 +46,7 @@ Dog* dog;
 Chicken* chicken;
 Horse* horse;
 Cow* cow;
+Wolf* wolf1, *wolf2, *wolf3;
 
 std::vector<Mix_Music*> music;
 Mix_Music* menuMusic;
@@ -59,6 +57,8 @@ Mix_Music* chickenMusic;
 Mix_Music* horseMusic;
 Mix_Music* cow1Music;
 Mix_Music* cow2Music;
+Mix_Music* handMusic;
+Mix_Music* wolfMusic;
 
 Bar* sheepBar;
 Bar* sheepBar2;
@@ -68,6 +68,9 @@ Bar* enemyBar2;
 GameObject* grass;
 double gDis;
 
+SDL_Rect* blackScreen = new SDL_Rect();
+Button* leaveButton;
+
 bool cutScene = false;
 uint8_t cutSceneFrame = 0;
 
@@ -76,9 +79,11 @@ std::vector<Hand*> hands;
 double radius;
 int x = 0, y = 0;
 
+std::vector<std::vector<int>> circles;
+
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
-	level = 0;
+	level = 5;
 	edge = originalEdge;
 	mouseX = &x;
 	mouseY = &y;
@@ -109,14 +114,27 @@ Game::Game(const char* title, bool fullscreen) {
 		horseMusic = createMusic("assets/horsin' around.ogg");
 		cow1Music = createMusic("assets/a magic cow.ogg");
 		cow2Music = createMusic("assets/YET TO BE FORGOTTEN.ogg");
+		handMusic = createMusic("assets/reaching out.ogg");
+		wolfMusic = createMusic("assets/lets play KILL.ogg");
+
 		Mix_PlayMusic(menuMusic, -1);
 		//SDL_SetWindowResizable(window, SDL_TRUE);
 		//Create renderer and game objects
 		renderer = SDL_CreateRenderer(window, -1, 0);
 		if (renderer) {
 			SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+			SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-			progressText = new TextArea("Use WASD to move, hold down to space to prevent movement. Use O to poke and P to swing. Press Enter to progress. Press X to skip a scene.", "BlackRunters", 250, black, yellow, 3000, renderer, height / 4);
+			blackScreen->x = 0;
+			blackScreen->y = 0;
+			blackScreen->w = width;
+			blackScreen->h = height;
+
+			leaveButton = new Button("Leave", "BlackRunters", 250, black, red, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
+			leaveButton->x = width / 2;
+			leaveButton->y = height / 2;
+
+			progressText = new TextArea("Use WASD to turn and move, with space preventing movement but can still turn. Use O to poke and P to swing. Press Enter to progress. Press X to skip a scene. Press Esc to pause/unpause.", "BlackRunters", 250, black, yellow, 3000, renderer, height / 4);
 			progressText->x = width - progressText->width / 2;
 			progressText->y = height - progressText->height / 2;
 
@@ -124,7 +142,7 @@ Game::Game(const char* title, bool fullscreen) {
 			titleText->x = width / 2;
 			titleText->y = height / 2;
 
-			upgradeText = new TextArea("Press B to reset gold and upgrades", "BlackRunters", 250, black, yellow, 1000, renderer, height / 3);
+			upgradeText = new TextArea("Use the buttons below Gold to upgrade poke speed, swing damage, and maybe the cooldown of something else. Press B to reset gold and upgrades", "BlackRunters", 250, black, yellow, 3000, renderer, height / 3);
 			upgradeText->y = height - upgradeText->height / 2;
 
 			goldText = new TextArea("", "BlackRunters", 250, yellow, black, 10000, renderer, height / 10);
@@ -137,6 +155,10 @@ Game::Game(const char* title, bool fullscreen) {
 			upgradeSwing = new Button("", "BlackRunters", 250, black, yellow, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
 			upgradeSwing->y = upgradePoke->y + upgradeSwing->height;
 			updateSwing(0);
+
+			upgradeFling = new Button("", "BlackRunters", 250, black, yellow, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
+			upgradeFling->y = upgradeSwing->y + upgradeFling->height;
+			updateFling(0);
 
 			farmerText = new TextArea("", "BlackRunters", 250, red, 10000, renderer, height / 5);
 			farmerText->angle = -10;
@@ -151,12 +173,14 @@ Game::Game(const char* title, bool fullscreen) {
 
 			sheep = new Sheep("assets/sheep1.png", renderer, height / 10, (float) height / 5000.0, 0.1, sheepBaseHealth, sheepBar);
 			sheep->setBounds(edge);
+			sheep->addSprite("assets/sheep2.png");
 
 			sheepBar2 = new Bar(1, 1, green, red, 0, 0, sheep->width, false, renderer);
 
 			enemyBar2 = new Bar(1, 1, green, red, 0, 0, sheep->width, false, renderer);
 
 			sword = new Sword("assets/sword.png", renderer, height / 10, sheep);
+			flyDistance = height / 2 - sword->height / 2;
 
 			grass = new GameObject("assets/grass.png", renderer, height * 2);
 			grass->x = width / 2;
@@ -179,7 +203,27 @@ Game::Game(const char* title, bool fullscreen) {
 			cow->x = width / 2;
 			cow->y = cow->height * 1.5;
 			cow->addSprite("assets/cow1.png");
+			cow->maxHealth2 = 15000;
+			if (level > 4) {
+				cow->phase = 4;
+				cow->bar = enemyBar2;
+				cow->setSprite(1);
+				sheep->bar = sheepBar2;
+				sheepBar2->setMax(sheep->maxHealth);
+				sheepBar2->setValue(sheep->health);
+				sheep->setBounds(10000.0);
+				sheep->flyable = true;
+				progressText->changeText("NEW: Press I to fling your sword when your body is ready, and then teleport to it by pressing I again");
+				progressText->x = width - progressText->width / 2;
+				maxUpgrades += 2;
+				updatePoke(0);
+				updateSwing(0);
+				updateFling(0);
+			}
 
+			wolf1 = new Wolf("assets/wolf.png", renderer, height / 15, 5000, sword, sheep, NULL);
+			wolf2 = new Wolf("assets/wolf.png", renderer, height / 15, 5000, sword, sheep, NULL);
+			wolf3 = new Wolf("assets/wolf.png", renderer, height / 15, 5000, sword, sheep, NULL);
 		}
 		else {
 			std::cout << SDL_GetError() << std::endl;
@@ -236,6 +280,33 @@ void Game::handleEvents() {
 
 void Game::update(int frame) {
 	//std::cout << *mouseX << ' ' << *mouseY << ' ' << upgradePoke->hovered() << std::endl;
+	//std::cout << GameObject::objects.size() << std::endl;
+	//std::cout << sheep->x << ' ' << sheep->y << std::endl;
+	SDL_SetCursor(SDL_GetDefaultCursor());
+
+	if (currentKeys.contains("Escape")) {
+		paused = !paused;
+		if (paused) {
+			if (Mix_PlayingMusic() == 1) {
+				Mix_PauseMusic();
+			}
+			leaveButton->x = GameObject::globalX + width / 2;
+			leaveButton->y = GameObject::globalY + height / 2;
+		}
+		else {
+			if (Mix_PausedMusic() == 1) {
+				Mix_ResumeMusic();
+			}
+		}
+	}
+	if (paused) {
+		if (leaveButton->clicked()) {
+			clean();
+			exit(0);
+		}
+		return;
+	}
+
 	if (room != "Menu" && room != "Prepare" && !cutScene) {
 		//Sheep update
 		if (keys.contains("W")) {
@@ -283,32 +354,69 @@ void Game::update(int frame) {
 			level -= 1;
 		}
 		if (cow->phase > 2 && room.starts_with("Level")) {
-			sheep->posBar();
-			GameObject::globalX = sheep->x - width / 2;
-			GameObject::globalY = sheep->y - height / 2;
 			if (sheep->x - grass->x > gDis) {
-				grass->x += gDis;
+				sheep->x -= gDis;
+				sword->x -= gDis;
+				for (auto e : Enemy::enemies) {
+					e->x -= gDis;
+				}
 			}
 			else if (sheep->x - grass->x < -gDis) {
-				grass->x -= gDis;
+				sheep->x += gDis;
+				sword->x += gDis;
+				for (auto e : Enemy::enemies) {
+					e->x += gDis;
+				}
 			}
 
 			if (sheep->y - grass->y > gDis) {
-				grass->y += gDis;
+				sheep->y -= gDis;
+				sword->y -= gDis;
+				for (auto e : Enemy::enemies) {
+					e->y -= gDis;
+				}
 			}
 			else if (sheep->y - grass->y < -gDis) {
-				grass->y -= gDis;
+				sheep->y += gDis;
+				sword->y += gDis;
+				for (auto e : Enemy::enemies) {
+					e->y += gDis;
+				}
 			}
+			GameObject::globalX = sheep->x - width / 2;
+			GameObject::globalY = sheep->y - height / 2;
+			sheep->posBar();
 		}
 
 		//Sword update
-		sword->sheepify();
+		if (sword->flying) {
+			//std::cout << hypot(sheep->x - sword->x, sheep->y - sword->y) << std::endl;
+			if (currentKeys.contains("I") || hypot(sheep->x - sword->x, sheep->y - sword->y) > flyDistance) {
+				sword->flying = false;
+				sheep->x = sword->x;
+				sheep->y = sword->y;
+				GameObject::globalX = sheep->x - width / 2;
+				GameObject::globalY = sheep->y - height / 2;
+				sheep->resetFlight();
+			}
+			circles.push_back({int(sheep->x - GameObject::globalX), int(sheep->y - GameObject::globalY), flyDistance + sword->height / 2});
+		}
+		else {
+			sword->sheepify();
+		}
 		if (!sword->out()) {
 			if (keys.contains("O")) {
 				//std::cout << "here";
 				sword->beginPoke();
-			} else if (keys.contains("P")) {
+			}
+			else if (keys.contains("P")) {
 				sword->beginSwing();
+			}
+			else if (currentKeys.contains("I")) {
+				if (sheep->flightRecharge == 0) {
+					sword->flying = true;
+					sword->angle += 270;
+				}
 			}
 		}
 		sword->swing(frame);
@@ -342,14 +450,27 @@ void Game::update(int frame) {
 				}
 			}
 		}
+		else if (upgradeFling->clicked()) {
+			if (updateGold(-1)) {
+				if (updateFling(1)) {
+					sheep->updateFlingTime();
+				}
+				else {
+					updateGold(1);
+				}
+			}
+		}
 		else if (currentKeys.contains("B")) {
 			sword->reset();
+			sheep->resetFling();
 			gold = level;
 			swingUpgrades = 0;
 			pokeUpgrades = 0;
+			flingUpgrades = 0;
 			updateGold(0);
 			updateSwing(0);
 			updatePoke(0);
+			updateFling(0);
 		}
 	}
 	if (room.starts_with("Level")) {
@@ -610,7 +731,7 @@ void Game::update(int frame) {
 					sword->x += height * 2;
 					cow->damaged(frame);
 					cow->boltsClear();
-					Mix_HaltMusic();
+					Mix_FadeOutMusic(1000);
 				}
 				break;
 			case 2:
@@ -623,6 +744,7 @@ void Game::update(int frame) {
 				case 1:
 					cow->x = width / 2;
 					cow->y = height / 2;
+					sword->prepare();
 					cutSceneFrame++;
 					break;
 				case 2:
@@ -633,6 +755,7 @@ void Game::update(int frame) {
 				case 3:
 					cow->lookAt(sheep);
 					sheep->lookAt(cow);
+					Mix_PlayMusic(handMusic, -1);
 					cutSceneFrame++;
 					break;
 				case 4:
@@ -682,10 +805,10 @@ void Game::update(int frame) {
 				case 11:
 					GameObject::globalY = 0.0;
 					for (int i = 0; i < 8; i++) {
-						hands.push_back(createHand(height / 30.0, 1));
-						hands[i]->x = radius * cos(QPI * i) + cow->x;
-						hands[i]->y = radius * sin(QPI * i) + cow->y;
-						hands[i]->lookAt(cow);
+						Hand* h = createHand(height / 30.0, 1);
+						h->x = radius * cos(QPI * i) + cow->x;
+						h->y = radius * sin(QPI * i) + cow->y;
+						h->lookAt(cow);
 					}
 					cutSceneFrame++;
 					break;
@@ -695,6 +818,7 @@ void Game::update(int frame) {
 						h->moveTowards(cow, 3.0 * frame);
 					}
 					if (currentKeys.contains("Return")) {
+						Mix_FadeOutMusic(1000);
 						cutSceneFrame++;
 					}
 					break;
@@ -711,9 +835,18 @@ void Game::update(int frame) {
 				case 14:
 					Mix_PlayMusic(cow2Music, -1);
 					cow->setSprite(1);
+					cow->setOpacity(1);
+					ticker = 0.0;
 					cutSceneFrame++;
 					break;
 				case 15:
+					ticker += float(frame) / 500.0;
+					for (double i = remainder(ticker, 1.0); i < ticker; i++) {
+						circles.push_back({ width / 2, height / 2, int(i * float(height) / 5.0) });
+					}
+					if (ticker > 5.0) {
+						ticker -= 1.0;
+					}
 					edge += (float)frame / 25000.0;
 					battleX = (1 - edge) / 2.0 * width;
 					battleY = (1 - edge) / 2.0 * height;
@@ -744,7 +877,7 @@ void Game::update(int frame) {
 					}
 					break;
 				case 18:
-					cow->speak("AND I WILL NOT BE FORGOTEEN");
+					cow->speak("AND I WILL NOT BE FORGOTTEN");
 					if (currentKeys.contains("Return")) {
 						cow->phase++;
 						cow->ticker = 0;
@@ -786,12 +919,13 @@ void Game::update(int frame) {
 			case 3:
 				if (!cow->damaged(frame)) {
 					cow->update(frame);
-					if (rand() % 100 == 99) {
+					ticker += (float)frame / 1000.0;
+					if (ticker > 2.0) {
 						int r = rand();
 						Hand* h = createHand(height / (r % 30 + 15), 1);
 						h->x = radius * cos(r) + GameObject::globalX;
 						h->y = radius * sin(r) + GameObject::globalY;
-						hands.push_back(h);
+						ticker = 0.0;
 					}
 					int size = hands.size();
 					for (int i = 0; i < size; i++) {
@@ -824,19 +958,205 @@ void Game::update(int frame) {
 					cow->setOpacity(1.0);
 					sword->x += height * 2;
 					cow->damaged(frame);
-					Mix_HaltMusic();
+					Mix_FadeOutMusic(3000);
 				}
 				break;
 			case 4:
+				switch (cutSceneFrame) {
+				case 0:
+					GameObject::globalX = cow->x - width / 2;
+					GameObject::globalY = cow->y - height / 2;
+					cow->setOpacity(1.0);
+					if (true) {
+						Hand* h = createHand(height / 5, 1);
+						h->x = width + h->width / 2 + GameObject::globalX;
+						h->y = height / 2 + GameObject::globalY;
+					}
+					cow->boltsClear();
+					cutSceneFrame++;
+					break;
+				case 1:
+					for (auto h : hands) {
+						if (h->moveTowards(cow, frame)) {
+							cow->x += (float)(h->height * frame) / 1000.0;
+						}
+					}
+					cow->speak("NOOOO");
+					if (currentKeys.contains("Return")) {
+						cutSceneFrame++;
+					}
+					break;
+				case 2:
+					for (auto h : hands) {
+						if (h->moveTowards(cow, frame)) {
+							cow->x += (float)(h->height * frame) / 1000.0;
+						}
+					}
+					cow->speak("IT CANNOT BE");
+					if (currentKeys.contains("Return") && Mix_PlayingMusic() == 0) {
+						ticker = 1.0;
+						Mix_PlayMusic(handMusic, -1);
+						cutSceneFrame++;
+					}
+					break;
+				case 3:
+					if (cow->x - GameObject::globalX < width + cow->width / 2) {
+						if (ticker > 0.0) {
+							cow->setOpacity(ticker);
+							ticker -= (float)frame / 1000.0;
+						}
+						else {
+							cow->setOpacity(0.0);
+							Mix_FadeOutMusic(10000);
+							cutSceneFrame++;
+						}
+					}
+					else {
+						Mix_FadeOutMusic(10000);
+						cutSceneFrame++;
+					}
+					break;
+				case 4:
+					cutScene = false;
+					for (auto h : hands) {
+						if (h->moveTowards(sheep, frame * h->height * 20.0 / height)) {
+							sheep->x += (float)(h->height * frame) / 10000.0;
+							h->damage(h->height * 200 / height);
+						}
+						if (h->collided(sword) && sword->swordOut) {
+							h->setKnockback(-(float)sword->height * 25.0 * cos(h->radians), -(float)sword->height * 25.0 * sin(h->radians), 50);
+						}
+						h->knockback(frame);
+					}
+					if (Mix_PlayingMusic() == 0) {
+						cutSceneFrame = 0;
+						sheep->flyable = true;
+						room = "Menu";
+						Mix_PlayMusic(menuMusic, -1);
+						GameObject::globalX = 0.0;
+						GameObject::globalY = 0.0;				
+						updateGold(1);
+						for (auto h : hands) {
+							destroyHand(h);
+						}
+						hands.clear();
+						progressText->changeText("NEW: Press I to fling your sword when your body is ready, and then teleport to it by pressing I again");
+						progressText->x = width - progressText->width / 2;
+						maxUpgrades += 2;
+						updatePoke(0);
+						updateSwing(0);
+						updateFling(0);
+					}
+					break;
+				}
 				break;
 			}
+			break;
+		case 6:
+			switch (Wolf::phase) {
+			case 0:
+				switch (cutSceneFrame) {
+				case 0:
+					cutScene = true;
+					wolf1->x = width / 2 - height / 3;
+					wolf1->y = -height / 4;
+					wolf1->angle = 270;
+					wolf2->x = width / 2;
+					wolf2->y = -height / 4;
+					wolf2->angle = 270;
+					wolf3->x = width / 2 + height / 3;
+					wolf3->angle = 270;
+					wolf3->y = -height / 4;
+					ticker = 0.0;
+					cutSceneFrame++;
+					break;
+				case 1:
+					wolf1->turnTowards(sheep, frame);
+					wolf3->turnTowards(sheep, frame);
+					wolf1->move(frame);
+					wolf2->move(frame);
+					wolf3->move(frame);
+					ticker += float(frame) / 1000.0;
+					if (ticker > 1.5) {
+						sheep->lookAt(wolf2);
+						wolf3->lookAt(wolf2);
+						//std::cout << wolf1->x << ' ' << wolf1->y;
+						cutSceneFrame++;
+					}
+					break;
+				case 2:
+					wolf2->speak("well well well boys look what we got here");
+					if (currentKeys.contains("Return")) {
+						cutSceneFrame++;
+					}
+					break;
+				case 3:
+					wolf2->speak("looks like meat is back on the menu boys");
+					if (currentKeys.contains("Return")) {
+						sheep->lookAt(wolf3);
+						cutSceneFrame++;
+					}
+					break;
+				case 4:
+					wolf3->speak("can I be on the menu?");
+					if (currentKeys.contains("Return")) {
+						wolf2->lookAt(wolf3);
+						cutSceneFrame++;
+					}
+					break;
+				case 5:
+					wolf2->speak("...");
+					if (currentKeys.contains("Return")) {
+						wolf2->lookAt(sheep);
+						cutSceneFrame++;
+					}
+					break;
+				case 6:
+					wolf2->speak("no");
+					if (currentKeys.contains("Return")) {
+						wolf3->lookAt(sheep);
+						Mix_PlayMusic(wolfMusic, -1);
+						Wolf::phase++;
+						cutScene = false;
+						cutSceneFrame = 0;
+						sheep->angle = 0;
+					}
+					break;
+				}
+				if (cutSceneFrame > 1 && keys.contains("X")) {
+					wolf2->lookAt(sheep);
+					wolf3->lookAt(sheep);
+					Mix_PlayMusic(wolfMusic, -1);
+					Wolf::phase++;
+					cutScene = false;
+					cutSceneFrame = 0;
+					sheep->angle = 0;
+				}
+				break;
+			case 1:
+				if (!(wolf1->damaged(frame) || wolf2->damaged(frame) || wolf3->damaged(frame))) {
+					wolf1->update1(frame);
+					wolf2->update2(frame);
+					wolf3->update3(frame);
+				}
+				break;
+			}
+			break;
 		}
 	}
 }
 
 
 void Game::render() {
+	//std::cout << room << std::endl;
 	grass->render();
+	if (room != "Menu") {
+		sheep->render();
+		//std::cout << sheep->inArea(*mouseX, *mouseY) << std::endl;
+		if (room != "Prepare") {
+			sword->renderSwing();
+		}
+	}
 	if (room == "Menu") {
 		progressText->render();
 		titleText->render();
@@ -847,6 +1167,9 @@ void Game::render() {
 		goldText->render();
 		upgradePoke->render();
 		upgradeSwing->render();
+		if (level > 4) {
+			upgradeFling->render();
+		}
 	}
 	if (room.starts_with("Level")) {
 		switch (level) {
@@ -873,6 +1196,12 @@ void Game::render() {
 				SDL_RenderDrawLine(renderer, battleX, battleY, battleX, battleY + edge * height);
 			}
 			cow->render();
+			break;
+		case 6:
+			wolf1->render();
+			wolf2->render();
+			wolf3->render();
+			break;
 		}
 		if (level < 5) {
 			cow->render();
@@ -884,13 +1213,8 @@ void Game::render() {
 			SDL_RenderDrawLine(renderer, battleX + edge * width, battleY + edge * height, battleX, battleY + edge * height);
 			SDL_RenderDrawLine(renderer, battleX, battleY, battleX, battleY + edge * height);
 		}
-		sheep->bar->render();
-	}
-	if (room != "Menu") {
-		sheep->render();
-		//std::cout << sheep->inArea(*mouseX, *mouseY) << std::endl;
-		if (room != "Prepare") {
-			sword->renderSwing();
+		if (cow->phase < 3 || !cutScene) {
+			sheep->bar->render();
 		}
 	}
 	if (farmerText->text != "") {
@@ -900,6 +1224,15 @@ void Game::render() {
 	for (auto h : hands) {
 		h->render();
 	}
+	if (paused) {
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 127);
+		SDL_RenderFillRect(renderer, blackScreen);
+		leaveButton->render();
+	}
+	for (std::vector<int> c : circles) {
+		drawCircle(c[0], c[1], c[2]);
+	}
+	circles.clear();
 	SDL_RenderPresent(renderer);
 }
 
@@ -909,8 +1242,10 @@ void Game::clean() {
 	for (auto m : music) {
 		Mix_FreeMusic(m);
 	}
-	for (auto o : GameObject::objects) {
-		o->clear();
+	for (auto o = GameObject::objects.begin(); o != GameObject::objects.end(); ) {
+		(*o)->clear();
+		//std::cout << GameObject::objects.size() << std::endl;
+		o = GameObject::objects.begin();
 	}
 	TTF_Quit();
 	Mix_Quit();
@@ -936,7 +1271,7 @@ int Game::getHeight() {
 }
 
 void Game::prepare() {
-	Mix_FadeOutMusic(1000);
+	Mix_FadeOutMusic(2000);
 	room = "Prepare";
 	GameObject::globalX = 0.0;
 	GameObject::globalY = 0.0;
@@ -955,6 +1290,7 @@ void Game::levelup() {
 	room = "Level";
 	room = room + std::to_string(level);
 	cow->ticker = 0;
+	sheep->resetFlight();
 	Mix_HaltMusic();
 	sheep->width /= 4;
 	sheep->height /= 4;
@@ -990,8 +1326,13 @@ void Game::levelup() {
 			destroyHand(h);
 		}
 		hands.clear();
+	case 6:
+		wolf1->prepare();
+		wolf2->prepare();
+		wolf3->prepare();
+		Wolf::phase = 0;
 	}
-	sheep->prepare();
+	sheep->prepare(level < 6);
 	sword->prepare();
 }
 
@@ -1034,6 +1375,19 @@ bool Game::updateSwing(int amount) {
 	return true;
 }
 
+bool Game::updateFling(int amount) {
+	flingUpgrades += amount;
+	if (flingUpgrades <= maxUpgrades) {
+		upgradeFling->changeText("Fling: " + std::to_string(flingUpgrades) + "/" + std::to_string(maxUpgrades));
+		upgradeFling->x = width - upgradeFling->width / 2;
+	}
+	else {
+		flingUpgrades -= amount;
+		return false;
+	}
+	return true;
+}
+
 Mix_Music* Game::createMusic(const char* file) {
 	Mix_Music* m = Mix_LoadMUS(file);
 	if (m == NULL) {
@@ -1051,10 +1405,11 @@ void Game::farmerSpeak(std::string text) {
 	farmerText->y = height / 2 + GameObject::globalY;
 }
 
-
+//also puts hand in hands
 Hand* Game::createHand(uint16_t height, int health) {
 	Bar* b = new Bar(health, health, green, red, 0, 0, sheep->width, false, renderer);
 	Hand* h = new Hand("assets/hand.png", renderer, height, health, sword, sheep, b);
+	hands.push_back(h);
 	return h;
 }
 
@@ -1062,4 +1417,42 @@ void Game::destroyHand(Hand* hand) {
 	delete hand->bar;
 	hand->clear();
 	delete hand;
+}
+
+void Game::drawCircle(int x, int y, int radius)
+{
+	int diameter = (radius * 2);
+
+	int dx = (radius - 1);
+	int dy = 0;
+	int tx = 1;
+	int ty = 1;
+	int error = (tx - diameter);
+
+	while (dx >= dy)
+	{
+		//  Each of the following renders an octant of the circle
+		SDL_RenderDrawPoint(renderer, x + dx, y - dy);
+		SDL_RenderDrawPoint(renderer, x + dx, y + dy);
+		SDL_RenderDrawPoint(renderer, x - dx, y - dy);
+		SDL_RenderDrawPoint(renderer, x - dx, y + dy);
+		SDL_RenderDrawPoint(renderer, x + dy, y - dx);
+		SDL_RenderDrawPoint(renderer, x + dy, y + dx);
+		SDL_RenderDrawPoint(renderer, x - dy, y - dx);
+		SDL_RenderDrawPoint(renderer, x - dy, y + dx);
+
+		if (error <= 0)
+		{
+			++dy;
+			error += ty;
+			ty += 2;
+		}
+
+		if (error > 0)
+		{
+			--dx;
+			tx += 2;
+			error += (tx - diameter);
+		}
+	}
 }

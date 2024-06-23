@@ -4,6 +4,7 @@ Sword::Sword(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, Sh
 	GameObject(spriteFile, renderer, height) {
 	this->sheepWidth = sheep->width / 2;
 	this->sheep = sheep;
+	fSpeed = fBaseSpeed * height;
 	reset();
 }
 
@@ -25,7 +26,7 @@ void Sword::swing(int frame) {
 		angle += swordAngle + 180;
 		result = true;
 	}
-	if (poke > 0) {
+	else if (poke > 0) {
 		angle += 270;
 		if (poking()) {
 			result = true;
@@ -35,13 +36,19 @@ void Sword::swing(int frame) {
 			poke = 0;
 		}
 	}
+	else if (flying) {
+		x -= fSpeed * sin(setRadians()) * (1 - flip);
+		y -= fSpeed * cos(radians) * (1 - flip);
+		swordOut = true;
+		return;
+	}
 	x -= (float) (sheepWidth + width / 2) * sin(setRadians()) * (1 - flip);
 	y -= (float) (sheepWidth + width / 2) * cos(radians) * (1 - flip);
 	swordOut = result;
 }
 
 bool Sword::out() {
-	return swordAngle > 0 || poke > 0;
+	return swordAngle > 0 || poke > 0 || flying;
 }
 
 void Sword::beginPoke() {
@@ -53,7 +60,7 @@ void Sword::beginSwing() {
 }
 
 void Sword::renderSwing(){
-	if (poking() || swinging()) {
+	if (poking() || swinging() || flying) {
 		render();
 	}
 }
@@ -81,6 +88,9 @@ int Sword::damage() {
 	else if (swinging()) {
 		return sDmg;
 	}
+	else if (flying) {
+		return fDmg;
+	}
 	else {
 		return 0;
 	}
@@ -93,5 +103,6 @@ void Sword::reset() {
 
 void Sword::prepare() {
 	poke = 0;
-	sAngle = 0;
+	swordAngle = 0;
+	flying = false;
 }

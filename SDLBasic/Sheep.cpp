@@ -8,8 +8,10 @@ Sheep::Sheep(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, do
 	this->health = health;
 	this->bar = bar;
 	this->maxHealth = health;
+	flightRechargeTime = baseFlightRechargeTime;
 	cWidth *= 0.8;
 	cHeight *= 0.8;
+	flightRecharge = flightRechargeTime;
 }
 
 void Sheep::move(double vel) {
@@ -34,12 +36,32 @@ bool Sheep::takeDmg(int dmg) {
 void Sheep::update(int frame) {
 	immunity -= frame;
 	immunity = immunity < 0 ? 0 : immunity;
+
+	if (flyable) {
+		if (flightRecharge > 0) {
+			flightRecharge -= frame;
+			if (flightRecharge == 0) {
+				flightRecharge--;
+			}
+		}
+		else if (flightRecharge < 0) {
+			setSprite(1);
+			flightRecharge = 0;
+		}
+	}
+
 	knockback(frame);
 }
 
-void Sheep::prepare() {
-	x = lowerX;
-	y = lowerY;
+void Sheep::prepare(bool farm) {
+	if (farm) {
+		x = lowerX;
+		y = lowerY;
+	}
+	else {
+		x = gameWidth / 2;
+		y = gameHeight / 2;
+	}
 	health = maxHealth;
 	bar->setValue(health);
 	setKnockback(0.0, 0.0, 0.0);
@@ -47,5 +69,18 @@ void Sheep::prepare() {
 
 void Sheep::posBar() {
 	bar->updatePos(x - width / 2 - GameObject::globalX, y + height / 2 - GameObject::globalY);
+}
+
+void Sheep::resetFlight() {
+	flightRecharge = flightRechargeTime;
+	setSprite(0);
+}
+
+void Sheep::resetFling() {
+	flightRechargeTime = baseFlightRechargeTime;
+}
+
+void Sheep::updateFlingTime() {
+	flightRechargeTime /= upgrade;
 }
  

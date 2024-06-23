@@ -12,7 +12,7 @@ bool Bull::move(double vel) {
 }
 
 void Bull::update(double frame) {
-	if (ticker <= 0) { //look at sheep
+	if (ticker <= 0.0) { //look at sheep
 		lookAt(sheep);
 		cAngle = angle;
 		ticker += frame / 3000;
@@ -24,24 +24,24 @@ void Bull::update(double frame) {
 		ticker = ticker > TAU ? 7 : ticker;
 		damage(10);
 	}
-	else if (ticker == 7){ //ready...
-		ticker = 8;
+	else if (ticker == 7.0){ //ready...
+		ticker = 8.0;
 		angle = cAngle;
 		setRadians();
 		move(frame);
 		damage(10);
 	}
-	else if (ticker == 8) { //CHARGE!!
+	else if (ticker == 8.0) { //CHARGE!!
 		if (move(frame)) {
 			//std::cout << cos(radians) << ' ' << sin(radians) << std::endl;
 			if (x == lowerX || x == upperX) {
 				if (abs(cos(radians)) > 0.1) {
-					ticker = 9;
+					ticker = 9.0;
 				}
 			}
 			if (y == lowerY || y == upperY) {
 				if (abs(sin(radians)) > 0.1) {
-					ticker = 9;
+					ticker = 9.0;
 				}
 			}
 		}

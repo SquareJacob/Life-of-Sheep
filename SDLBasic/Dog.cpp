@@ -39,33 +39,7 @@ void Dog::update(double frame) {
 			ticker += frame / 1000;
 		}
 		else { //run towards sheep
-			aSpeed = baseAngleSpeed * (3.0 - 2.0 * (float)health / (float)maxHealth);
-			sAngle = atan2(y - sheep->y, sheep->x - x) * 180.0 / PI;
-			if (sAngle < 0) {
-				sAngle += 360.0;
-			}
-			if (sAngle < angle) {
-				if (angle - sAngle < 180.0) {
-					angle -= frame * aSpeed;
-				}
-				else {
-					angle += frame * aSpeed;
-					if (angle > 360) {
-						angle -= 360;
-					}
-				}
-			}
-			else {
-				if (sAngle - angle < 180.0) {
-					angle += frame * aSpeed;
-				}
-				else {
-					angle -= frame * aSpeed;
-					if (angle < 0) {
-						angle += 360;
-					}
-				}
-			}
+			turnTowards(sheep, baseAngleSpeed * (3.0 - 2.0 * (float)health / (float)maxHealth) * frame);		
 			if (move(frame)) {
 				ticker = 0;
 			}

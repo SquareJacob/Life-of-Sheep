@@ -19,15 +19,22 @@ public:
     //make the sheep feel pain; returns whether the sheep felt pain (aka not in immunity frame)
     bool takeDmg(int dmg);
     void update(int frame);
-    void prepare();
+    void prepare(bool farm = true);
     void posBar();
+    void resetFlight();
+    void resetFling();
+    void updateFlingTime();
     int maxHealth;
     int health;
     Bar* bar;
+    int flightRecharge;
+    bool flyable = false;
 private:
+    int flightRechargeTime, baseFlightRechargeTime = 5000;
     double speed; //movespeed porpotion
     double aSpeed; //rotation speed porpotion
     int immunityFrames = 500; //ms of immunity
     int immunity = 0;
+    double upgrade = 1.1;
 };
 

@@ -15,7 +15,7 @@ public:
     void render();
     void boltsClear();
     uint8_t phase = 0; //0 = first scene, 1 = first battle, 2 = second scene, 3 = second battle, 4 = final scene
-    int maxHealth2 = 15000;
+    int maxHealth2;
     class Bolt :
         public Enemy 
     {

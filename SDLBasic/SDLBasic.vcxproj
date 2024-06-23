@@ -151,6 +151,7 @@
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Sword.cpp" />
     <ClCompile Include="TextArea.cpp" />
+    <ClCompile Include="Wolf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bar.h" />
@@ -169,6 +170,7 @@
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="Sword.h" />
     <ClInclude Include="TextArea.h" />
+    <ClInclude Include="Wolf.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\bull.png" />
@@ -183,7 +185,9 @@
     <Image Include="assets\hand.png" />
     <Image Include="assets\horse.png" />
     <Image Include="assets\sheep1.png" />
+    <Image Include="assets\sheep2.png" />
     <Image Include="assets\sword.png" />
+    <Image Include="assets\wolf.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\a magic cow.ogg" />
@@ -192,7 +196,9 @@
     <None Include="assets\cock.ogg" />
     <None Include="assets\horsin%27 around.ogg" />
     <None Include="assets\lets play fetch.ogg" />
+    <None Include="assets\lets play KILL.ogg" />
     <None Include="assets\moo.ogg" />
+    <None Include="assets\reaching out.ogg" />
     <None Include="assets\YET TO BE FORGOTTEN.ogg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -52,6 +52,7 @@ void Chick::update(double frame) {
 			}
 		}
 		else if (behavior == 2) {
+			turnTowards(sheep, frame * stage * stage / 50.0);
 			move(frame * 3.0);
 			ticker += frame / 1000.0;
 			if (ticker > 2.0) {
