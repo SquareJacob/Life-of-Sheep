@@ -78,6 +78,7 @@ std::vector<Hand*> hands;
 
 double radius;
 int x = 0, y = 0;
+double desiredX = 0.0, desiredY = 0.0, dSpeed = 0.01, cameraDistance;
 
 std::vector<std::vector<int>> circles;
 
@@ -101,6 +102,7 @@ Game::Game(const char* title, bool fullscreen) {
 		radius = width > height ? width : height;
 		battleX = (1 - edge) / 2.0 * width;
 		battleY = (1 - edge) / 2.0 * height;
+		dSpeed *= height;
 		//Create window
 		window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
 		if (window == NULL) {
@@ -221,9 +223,9 @@ Game::Game(const char* title, bool fullscreen) {
 				updateFling(0);
 			}
 
-			wolf1 = new Wolf("assets/wolf.png", renderer, height / 15, 5000, sword, sheep, NULL);
-			wolf2 = new Wolf("assets/wolf.png", renderer, height / 15, 5000, sword, sheep, NULL);
-			wolf3 = new Wolf("assets/wolf.png", renderer, height / 15, 5000, sword, sheep, NULL);
+			wolf1 = new Wolf("assets/wolf.png", renderer, height / 15, 2000, sword, sheep, NULL);
+			wolf2 = new Wolf("assets/wolf.png", renderer, height / 15, 2000, sword, sheep, NULL);
+			wolf3 = new Wolf("assets/wolf.png", renderer, height / 15, 2000, sword, sheep, NULL);
 		}
 		else {
 			std::cout << SDL_GetError() << std::endl;
@@ -349,14 +351,11 @@ void Game::update(int frame) {
 			sheep->move(frame);
 		}
 		sheep->update(frame);
-		if (sheep->health == 0) {
-			prepare();
-			level -= 1;
-		}
 		if (cow->phase > 2 && room.starts_with("Level")) {
 			if (sheep->x - grass->x > gDis) {
 				sheep->x -= gDis;
 				sword->x -= gDis;
+				GameObject::globalX -= gDis;
 				for (auto e : Enemy::enemies) {
 					e->x -= gDis;
 				}
@@ -364,6 +363,7 @@ void Game::update(int frame) {
 			else if (sheep->x - grass->x < -gDis) {
 				sheep->x += gDis;
 				sword->x += gDis;
+				GameObject::globalX += gDis;
 				for (auto e : Enemy::enemies) {
 					e->x += gDis;
 				}
@@ -372,6 +372,7 @@ void Game::update(int frame) {
 			if (sheep->y - grass->y > gDis) {
 				sheep->y -= gDis;
 				sword->y -= gDis;
+				GameObject::globalY -= gDis;
 				for (auto e : Enemy::enemies) {
 					e->y -= gDis;
 				}
@@ -379,12 +380,24 @@ void Game::update(int frame) {
 			else if (sheep->y - grass->y < -gDis) {
 				sheep->y += gDis;
 				sword->y += gDis;
+				GameObject::globalY += gDis;
 				for (auto e : Enemy::enemies) {
 					e->y += gDis;
 				}
 			}
-			GameObject::globalX = sheep->x - width / 2;
-			GameObject::globalY = sheep->y - height / 2;
+			//GameObject::globalX = sheep->x - width / 2;
+			//GameObject::globalY = sheep->y - height / 2;
+			desiredX = sheep->x - width / 2;
+			desiredY = sheep->y - height / 2;
+			cameraDistance = hypot(desiredX - GameObject::globalX, desiredY - GameObject::globalY);
+			if (cameraDistance < dSpeed) {
+				GameObject::globalX = desiredX;
+				GameObject::globalY = desiredY;
+			}
+			else {
+				GameObject::globalX += dSpeed / cameraDistance * (desiredX - GameObject::globalX);
+				GameObject::globalY += dSpeed / cameraDistance * (desiredY - GameObject::globalY);
+			}
 			sheep->posBar();
 		}
 
@@ -395,8 +408,6 @@ void Game::update(int frame) {
 				sword->flying = false;
 				sheep->x = sword->x;
 				sheep->y = sword->y;
-				GameObject::globalX = sheep->x - width / 2;
-				GameObject::globalY = sheep->y - height / 2;
 				sheep->resetFlight();
 			}
 			circles.push_back({int(sheep->x - GameObject::globalX), int(sheep->y - GameObject::globalY), flyDistance + sword->height / 2});
@@ -420,6 +431,11 @@ void Game::update(int frame) {
 			}
 		}
 		sword->swing(frame);
+
+		if (sheep->health == 0) {
+			prepare();
+			level -= 1;
+		}
 	}
 
 	if (room == "Menu") {
@@ -1134,11 +1150,29 @@ void Game::update(int frame) {
 				}
 				break;
 			case 1:
-				if (!(wolf1->damaged(frame) || wolf2->damaged(frame) || wolf3->damaged(frame))) {
+				uint8_t dead = 0;
+				if (wolf1->damaged(frame)) {
+					dead++;
+				}
+				else {
 					wolf1->update1(frame);
+				}
+
+				if (wolf2->damaged(frame)) {
+					dead++;
+				}
+				else {
 					wolf2->update2(frame);
+				}
+
+				if (wolf3->damaged(frame)) {
+					dead++;
+				}
+				else {
 					wolf3->update3(frame);
 				}
+				Wolf::dead = dead;
+				dead = 0;
 				break;
 			}
 			break;
@@ -1275,6 +1309,7 @@ void Game::prepare() {
 	room = "Prepare";
 	GameObject::globalX = 0.0;
 	GameObject::globalY = 0.0;
+	sheep->resetFlight();
 	grass->x = width / 2;
 	grass->y = height / 2;
 	sheep->x = 3 * sheep->width;
@@ -1290,7 +1325,6 @@ void Game::levelup() {
 	room = "Level";
 	room = room + std::to_string(level);
 	cow->ticker = 0;
-	sheep->resetFlight();
 	Mix_HaltMusic();
 	sheep->width /= 4;
 	sheep->height /= 4;

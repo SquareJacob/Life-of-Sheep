@@ -37,7 +37,7 @@ void Wolf::update1(double frame) {
 
 	}
 	else {
-		ticker = -(float)health / (float)maxHealth;
+		ticker = -(float)health / (float)maxHealth / (float)(dead + 1);
 	}
 }
 
@@ -50,7 +50,7 @@ void Wolf::update2(double frame) {
 			angle -= 360;
 		}
 	}
-	turnTowards(sheep, aSpeed * (3.0 - 2.0 * (float)health / (float)maxHealth) * frame);
+	turnTowards(sheep, aSpeed * (2.0 - 1.0 * (float)health / (float)maxHealth) * frame * (float)(dead + 1));
 	move(frame);
 	damage(15);
 }
@@ -63,11 +63,12 @@ void Wolf::update3(double frame) {
 	disX = sheep->x - x;
 	disY = sheep->y - y;
 	disSquared = disX * disX + disY * disY;
-	tAccel = frame * accel * (2.0 - (float)health / (float)maxHealth) / pow(disSquared, 0.5);
+	aMult = (2.0 - (float)health / (float)maxHealth) * (float)(dead + 1);
+	tAccel = frame * accel * aMult / pow(disSquared, 0.5);
 	velX += tAccel * disX;
 	velY += tAccel * disY;
 	knockback(frame);
-	damage(hypot(velX, velY) * 50.0 + 10);
+	damage(hypot(velX, velY) * 50.0 / aMult + 5);
 	x += frame * velX;
 	y += frame * velY;
 	ticker += frame / 1000.0;
@@ -91,6 +92,8 @@ void Wolf::prepare() {
 	velX = 0.0;
 	velY = 0.0;
 	realHits = 0;
+	dead = 0;
 }
 
 uint8_t Wolf::phase = 0;
+uint8_t Wolf::dead = 0;
