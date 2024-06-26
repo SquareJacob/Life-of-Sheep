@@ -1,5 +1,9 @@
 #include "Bar.h"
 #include <string>
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 Bar::Bar(Uint32 iValue, Uint32 mValue, SDL_Color fg, SDL_Color bg, Uint16 x, Uint16 y, Uint16 length, bool vertical, SDL_Renderer* renderer) {
 	this->iValue = iValue;
@@ -12,6 +16,7 @@ Bar::Bar(Uint32 iValue, Uint32 mValue, SDL_Color fg, SDL_Color bg, Uint16 x, Uin
 	this->y = y;
 	this->renderer = renderer;
 	createRects();
+	bars.push_back(this);
 }
 
 void Bar::updatePos(int16_t x, int16_t y) {
@@ -81,3 +86,5 @@ void Bar::updateLength(Uint16 length) {
 Uint16 Bar::getHeight() {
 	return height;
 }
+
+std::vector<Bar*> Bar::bars;

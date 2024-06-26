@@ -1,5 +1,9 @@
 #include "Chick.h"
 #include <stdlib.h>
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 Chick::Chick(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar) :
 	Enemy(spriteFile, renderer, height, health, sword, sheep, bar) {
@@ -18,7 +22,7 @@ void Chick::hatch() {
 
 bool Chick::move(double vel) {
 	bool result = shift(speed * vel * stage);
-	bar->updatePos(x - width / 2, y + height / 2);
+	bar->updatePos(int(x - float(width) / 2.0), int(y + float(height) / 2.0));
 	return result;
 }
 
@@ -29,6 +33,7 @@ void Chick::update(double frame) {
 		}
 		else {
 			hatch();
+			bar->updatePos(int(x - float(width) / 2.0), int(y + float(height) / 2.0));
 		}
 	}
 	else {
@@ -42,11 +47,11 @@ void Chick::update(double frame) {
 			}
 		}
 		else if (behavior == 1) {
-			bar->updatePos(x - width / 2, y + height / 2);
+			bar->updatePos(int(x - float(width) / 2.0), int(y + float(height) / 2.0));
 			ticker += frame / 1000.0;
-			if (ticker < stage / 6.0) {
+			/**if (ticker < stage / 6.0) {
 				lookAt(sheep);
-			}
+			}**/
 			if (ticker > 1.0) {
 				behavior = 2;
 			}
@@ -60,12 +65,10 @@ void Chick::update(double frame) {
 				behavior = 0;
 			}
 		}
-		damage(10 * stage);
-		if (damaged(frame)) {
+		damage(25);
+		if (damaged(int(frame))) {
 			prepare();
 		}
-		stage += frame / 50000.0;
-		stage = stage > 4.0 ? 4.0 : stage;
 	}
 }
 

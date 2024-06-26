@@ -11,11 +11,16 @@ public:
     void update3(double frame);
     void prepare();
     void render();
+    double distToSheep();
+    void chase(double frame);
     static uint8_t phase;
     static uint8_t dead;
 private:
     double speed;
     double cAngle;
+    double chasePorpotion = 25.0, stopChasePorportion = 5.0;
+    double chaseDistance, stopChaseDistance;
+    bool chasing = false;
     const int chargeTime = 250; //take it takes to prepare charge, in ms
     const int prepAngle = 10; //radius of degrees to tilt by during charge prep
     double aSpeed = 0.05;

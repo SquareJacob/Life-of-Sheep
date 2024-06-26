@@ -1,5 +1,9 @@
 #include "Sheep.h"
 #include <string>
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 Sheep::Sheep(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, double speed, double aSpeed, int health, Bar* bar) :
 	GameObject(spriteFile, renderer, height) {

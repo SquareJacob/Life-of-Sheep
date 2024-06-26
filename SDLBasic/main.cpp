@@ -1,10 +1,14 @@
 #include "Game.h"
 #include <filesystem>
 namespace fs = std::filesystem;
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif
 
-
-Game* game = nullptr;
 int main(int argc, char* argv[]) {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	Game* game = nullptr;
 	srand(time(0));
 	std::cout << "Current path is " << fs::current_path() << '\n';
 	const int FPS = 60;
@@ -24,5 +28,6 @@ int main(int argc, char* argv[]) {
 		}
 	}
 	game->clean();
+	delete game;
 	return 0;
 }

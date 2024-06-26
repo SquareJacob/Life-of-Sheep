@@ -1,4 +1,8 @@
 #include "Sword.h"
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 Sword::Sword(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, Sheep* sheep) :
 	GameObject(spriteFile, renderer, height) {

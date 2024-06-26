@@ -12,6 +12,8 @@ public:
     void render();
 private:
     double eggReady = 0;
+    double aSpeed = 0.0;
+    double aAccel = 0.0001;
     std::vector<Chick*> chicks;
     double speed;
     int chickHealth;

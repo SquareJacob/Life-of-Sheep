@@ -1,8 +1,12 @@
 #include "Cow.h"
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 Cow::Cow(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar, double edge) :
 	Enemy(spriteFile, renderer, height, health, sword, sheep, bar) {
-	SDL_SetTextureAlphaMod(sprite->texture, opacity * 255);
+	SDL_SetTextureAlphaMod(sprite->texture, int(opacity * 255));
 	speed = height / 300.0;
 	Bolt::speed = height / 300.0;
 	this->edge = edge;
@@ -29,7 +33,7 @@ bool Cow::wiggle(double frame) {
 		opacity = 1;
 		result = true;
 	}
-	SDL_SetTextureAlphaMod(sprite->texture, opacity * 255);
+	SDL_SetTextureAlphaMod(sprite->texture, int(opacity * 255));
 	y += frame / 1000.0 * (float) height * cos(TAU * opacity);
 	return result;
 }
@@ -64,7 +68,7 @@ void Cow::update(double frame) {
 			}
 			else {
 				if (wiggle(frame)) {
-					Bolt* b = new Bolt("assets/flame.png", sprite->renderer, height / 3.0, 1, sword, sheep, NULL, this);
+					Bolt* b = new Bolt("assets/flame.png", sprite->renderer, height / 3, 1, sword, sheep, NULL, this);
 					b->x = x;
 					b->y = y;
 					b->lookAt(sheep);
@@ -93,7 +97,7 @@ void Cow::update(double frame) {
 			}
 			else {
 				if (wiggle(frame * (2.0 - (float) health / (float) maxHealth2))) {
-					Bolt* b = new Bolt("assets/flame.png", sprite->renderer, height / 3.0, 1, sword, sheep, NULL, this);
+					Bolt* b = new Bolt("assets/flame.png", sprite->renderer, height / 3, 1, sword, sheep, NULL, this);
 					b->x = x;
 					b->y = y;
 					b->lookAt(sheep);
@@ -104,11 +108,12 @@ void Cow::update(double frame) {
 			}
 		}
 	}
-	uint8_t size = bolts.size();
-	for (int i = 0; i < size; i++) {
+	uint8_t size = int(bolts.size());
+	for (uint8_t i = 0; i < size; i++) {
 		if (bolts[i]->update(frame)) {
-			bolts[i]->clear();
-			bolts.erase(std::next(bolts.begin(), i));
+			delete bolts[i]->bar;
+			bolts[i]->erase();
+			bolts.erase(bolts.begin() + i);
 			i--;
 			size--;
 		}
@@ -150,7 +155,7 @@ bool Cow::Bolt::update(double frame) {
 			return true;
 		}
 	}
-	if (damage(cow->phase * 10)) {
+	if (damage(cow->phase * 5 + 5)) {
 		return true;
 	}
 	if (ticker > 0.4) {
@@ -169,7 +174,7 @@ bool Cow::Bolt::update(double frame) {
 		}
 	}
 	else {
-		immunity -= frame;
+		immunity -= int(frame);
 		immunity = immunity < 0 ? 0 : immunity;
 	}
 	return false;

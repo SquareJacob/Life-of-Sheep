@@ -6,6 +6,14 @@
 #include <vector>
 #include <set>
 #include <stdlib.h>
+#include <stdlib.h>  
+#include <crtdbg.h>   //for malloc and free
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define DEBUG_NEW   new( _NORMAL_BLOCK, __FILE__, __LINE__)
+#else
+#define DEBUG_NEW
+#endif
 #define PI 3.14159265
 #define QPI PI/4.0 //Quarter of PI
 #define TAU PI * 2
@@ -15,6 +23,7 @@
 #define blue SDL_Color{ 37, 75, 150 }
 #define yellow SDL_Color{ 250, 167, 63 }
 #define white SDL_Color{ 255, 255, 255 }
+#define big boy
 //Should be subclassed into specific objects
 class GameObject
 {
@@ -43,7 +52,7 @@ public:
 	//renderer: what sprite will be rendererd to
 	//height: height of object; width will be based on porportions of original sprite
 	GameObject(std::string text, std::string font, int size, SDL_Color fg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height);
-	~GameObject();
+	virtual ~GameObject() { }
 	//renders the object, centered at (x,y)
 	void render();
 	//sets public field radians using angle, and returns radians
@@ -71,6 +80,7 @@ public:
 	void setKnockback(double x, double y, double time);
 	void knockback(double frame, bool bound = true);
 	void clear();
+	void erase();
 	void lookAt(GameObject* object);
 	//0 = invisible, 1 = visible; changes only current sprite
 	void setOpacity(double o);

@@ -1,5 +1,5 @@
 #include "GameObject.h"
-#include "Sprite.h";
+#include "Sprite.h"  
 
 void GameObject::objectize(uint16_t height) {
 	sprites.push_back(sprite);
@@ -36,8 +36,6 @@ GameObject::GameObject(std::string text, std::string font, int size, SDL_Color f
 	sprite = new Sprite(text, font, size, fg, wrapLength, renderer);
 	objectize(height);
 }
-
-GameObject::~GameObject() {}
 
 void GameObject::render() {
 	sprite->place(x - width / 2 - globalX, y - height / 2 - globalY, width, height, angle, flip);
@@ -269,8 +267,14 @@ void GameObject::knockback(double frame, bool bound) {
 void GameObject::clear() {
 	for (auto s : sprites) {
 		SDL_DestroyTexture(s->texture);
+		delete s;
 	}
+}
+
+void GameObject::erase() {
+	clear();
 	objects.erase(std::find(objects.begin(), objects.end(), this));
+	delete this;
 }
 
 void GameObject::lookAt(GameObject* object) {
@@ -332,4 +336,3 @@ std::vector<double> GameObject::corners(8);
 std::vector<double> GameObject::uVectors(4);
 std::vector<double> GameObject::distances(4);
 std::vector<GameObject*> GameObject::objects;
-

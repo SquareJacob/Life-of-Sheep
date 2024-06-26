@@ -14,6 +14,7 @@ public:
     void updateLength(Uint16 length);
     void updatePos(int16_t x, int16_t y);
     Uint16 getHeight();
+    static std::vector<Bar*> bars;
 protected:
     void createRects();
     void updateBar();

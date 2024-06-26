@@ -1,7 +1,6 @@
 /**
 * TODO:
 * -"Text has zero width"
-* -Reset button
 **/
 
 #include "Game.h"
@@ -16,7 +15,7 @@
 #include "Chicken.h"
 #include "Horse.h"
 #include "Button.h"
-#include "Wolf.h"
+#include "Wolf.h" 
 
 Sheep* sheep;
 const int sheepBaseHealth = 300;
@@ -70,6 +69,7 @@ double gDis;
 
 SDL_Rect* blackScreen = new SDL_Rect();
 Button* leaveButton;
+Button* resetButton;
 
 bool cutScene = false;
 uint8_t cutSceneFrame = 0;
@@ -84,7 +84,7 @@ std::vector<std::vector<int>> circles;
 
 Game::Game(const char* title, bool fullscreen) {
 	room = "Menu";
-	level = 5;
+	level = 4;
 	edge = originalEdge;
 	mouseX = &x;
 	mouseY = &y;
@@ -136,6 +136,8 @@ Game::Game(const char* title, bool fullscreen) {
 			leaveButton->x = width / 2;
 			leaveButton->y = height / 2;
 
+			resetButton = new Button("Reset", "BlackRunters", 250, black, blue, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
+
 			progressText = new TextArea("Use WASD to turn and move, with space preventing movement but can still turn. Use O to poke and P to swing. Press Enter to progress. Press X to skip a scene. Press Esc to pause/unpause.", "BlackRunters", 250, black, yellow, 3000, renderer, height / 4);
 			progressText->x = width - progressText->width / 2;
 			progressText->y = height - progressText->height / 2;
@@ -147,31 +149,31 @@ Game::Game(const char* title, bool fullscreen) {
 			upgradeText = new TextArea("Use the buttons below Gold to upgrade poke speed, swing damage, and maybe the cooldown of something else. Press B to reset gold and upgrades", "BlackRunters", 250, black, yellow, 3000, renderer, height / 3);
 			upgradeText->y = height - upgradeText->height / 2;
 
-			goldText = new TextArea("", "BlackRunters", 250, yellow, black, 10000, renderer, height / 10);
+			goldText = new TextArea("0", "BlackRunters", 250, yellow, black, 10000, renderer, height / 10);
 			updateGold(level);
 
-			upgradePoke = new Button("", "BlackRunters", 250, black, yellow, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
+			upgradePoke = new Button("0", "BlackRunters", 250, black, yellow, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
 			upgradePoke->y = goldText->height + upgradePoke->height / 2;
 			updatePoke(0);
 
-			upgradeSwing = new Button("", "BlackRunters", 250, black, yellow, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
+			upgradeSwing = new Button("0", "BlackRunters", 250, black, yellow, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
 			upgradeSwing->y = upgradePoke->y + upgradeSwing->height;
 			updateSwing(0);
 
-			upgradeFling = new Button("", "BlackRunters", 250, black, yellow, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
+			upgradeFling = new Button("0", "BlackRunters", 250, black, yellow, 10000, renderer, height / 10, mouseX, mouseY, buttons, currentButtons);
 			upgradeFling->y = upgradeSwing->y + upgradeFling->height;
 			updateFling(0);
 
-			farmerText = new TextArea("", "BlackRunters", 250, red, 10000, renderer, height / 5);
+			farmerText = new TextArea("0", "BlackRunters", 250, red, 10000, renderer, height / 5);
 			farmerText->angle = -10;
 			
 			farmerShake = (float) height / 100.0;
 
 			sheepBar = new Bar(sheepBaseHealth, sheepBaseHealth, green, red, 0, 0, height, true, renderer);
-			sheepBar->updateHeight(battleX);
+			sheepBar->updateHeight(int(battleX));
 
 			enemyBar = new Bar(1, 1, red, blue, width - sheepBar->getHeight(), 0, height, true, renderer);
-			enemyBar->updateHeight(battleX);
+			enemyBar->updateHeight(int(battleX));
 
 			sheep = new Sheep("assets/sheep1.png", renderer, height / 10, (float) height / 5000.0, 0.1, sheepBaseHealth, sheepBar);
 			sheep->setBounds(edge);
@@ -195,13 +197,13 @@ Game::Game(const char* title, bool fullscreen) {
 			dog = new Dog("assets/dog.png", renderer, height / 15, 6000, sword, sheep, enemyBar);
 			dog->setBounds(edge);
 
-			chicken = new Chicken("assets/chicken.png", renderer, height / 15, 10000, sword, sheep, enemyBar, edge, yellow, red);
+			chicken = new Chicken("assets/chicken.png", renderer, height / 15, 5000, sword, sheep, enemyBar, edge, yellow, red);
 			chicken->setBounds(edge);
 
 			horse = new Horse("assets/horse.png", renderer, height / 7, 9000, sword, sheep, enemyBar);
 			horse->setBounds(edge);
 
-			cow = new Cow("assets/cow.png", renderer, height / 10, 1000, sword, sheep, enemyBar, edge);
+			cow = new Cow("assets/cow.png", renderer, height / 10, 10, sword, sheep, enemyBar, edge);
 			cow->x = width / 2;
 			cow->y = cow->height * 1.5;
 			cow->addSprite("assets/cow1.png");
@@ -223,9 +225,9 @@ Game::Game(const char* title, bool fullscreen) {
 				updateFling(0);
 			}
 
-			wolf1 = new Wolf("assets/wolf.png", renderer, height / 15, 2000, sword, sheep, NULL);
+			wolf1 = new Wolf("assets/wolf.png", renderer, height / 15, 1500, sword, sheep, NULL);
 			wolf2 = new Wolf("assets/wolf.png", renderer, height / 15, 2000, sword, sheep, NULL);
-			wolf3 = new Wolf("assets/wolf.png", renderer, height / 15, 2000, sword, sheep, NULL);
+			wolf3 = new Wolf("assets/wolf.png", renderer, height / 15, 3000, sword, sheep, NULL);
 		}
 		else {
 			std::cout << SDL_GetError() << std::endl;
@@ -294,6 +296,10 @@ void Game::update(int frame) {
 			}
 			leaveButton->x = GameObject::globalX + width / 2;
 			leaveButton->y = GameObject::globalY + height / 2;
+			if (room.starts_with("Level")) {
+				resetButton->x = GameObject::globalX + width / 2;
+				resetButton->y = GameObject::globalY + height / 4;
+			}
 		}
 		else {
 			if (Mix_PausedMusic() == 1) {
@@ -303,8 +309,19 @@ void Game::update(int frame) {
 	}
 	if (paused) {
 		if (leaveButton->clicked()) {
-			clean();
-			exit(0);
+			isRunning = false;
+		}
+		if (room.starts_with("Level")) {
+			if (resetButton->clicked()) {
+				if (Mix_PausedMusic() == 1) {
+					Mix_ResumeMusic();
+					Mix_HaltMusic();
+				}
+				prepare();
+				level -= 1;
+				paused = false;
+				cow->setOpacity(0.0);
+			}
 		}
 		return;
 	}
@@ -821,7 +838,7 @@ void Game::update(int frame) {
 				case 11:
 					GameObject::globalY = 0.0;
 					for (int i = 0; i < 8; i++) {
-						Hand* h = createHand(height / 30.0, 1);
+						Hand* h = createHand(height / 30, 1);
 						h->x = radius * cos(QPI * i) + cow->x;
 						h->y = radius * sin(QPI * i) + cow->y;
 						h->lookAt(cow);
@@ -866,8 +883,8 @@ void Game::update(int frame) {
 					edge += (float)frame / 25000.0;
 					battleX = (1 - edge) / 2.0 * width;
 					battleY = (1 - edge) / 2.0 * height;
-					sheepBar->updatePos(battleX - sheepBar->getHeight(), 0);
-					enemyBar->updatePos(battleX + edge * width, 0);
+					sheepBar->updatePos(int(battleX) - sheepBar->getHeight(), 0);
+					enemyBar->updatePos(int(battleX + edge * width), 0);
 					cow->speak("NO!!!");
 					for (auto h : hands) {
 						h->moveTowards(cow, -5.0 * frame);
@@ -943,16 +960,16 @@ void Game::update(int frame) {
 						h->y = radius * sin(r) + GameObject::globalY;
 						ticker = 0.0;
 					}
-					int size = hands.size();
-					for (int i = 0; i < size; i++) {
+					int16_t size = int(hands.size());
+					for (int16_t i = 0; i < size; i++) {
 						if (hands[i]->moveTowards(cow, frame)) {
 							cow->x += (float)(hands[i]->height * frame) / 1000.0;
 						}
-						hands[i]->damage(hands[i]->height * 75 / height);
-						hands[i]->damage(hands[i]->height * 75 / height, cow);
+						hands[i]->damage(hands[i]->height * 40 / height);
+						hands[i]->damage(hands[i]->height * 40 / height, cow);
 						if (hands[i]->collided(sword) && sword->swordOut) {
 							destroyHand(hands[i]);
-							hands.erase(std::next(hands.begin(), i));
+							hands.erase(hands.begin() + i);
 							i--;
 							size--;
 							continue;
@@ -960,7 +977,7 @@ void Game::update(int frame) {
 						for (auto bolt : cow->bolts) {
 							if (bolt->collided(hands[i])) {
 								destroyHand(hands[i]);
-								hands.erase(std::next(hands.begin(), i));
+								hands.erase(hands.begin() + i);
 								i--;
 								size--;
 								break;
@@ -1224,10 +1241,10 @@ void Game::render() {
 				enemyBar->render();
 				//render edge of battlefield
 				SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-				SDL_RenderDrawLine(renderer, battleX, battleY, battleX + edge * width, battleY);
-				SDL_RenderDrawLine(renderer, battleX + edge * width, battleY + edge * height, battleX + edge * width, battleY);
-				SDL_RenderDrawLine(renderer, battleX + edge * width, battleY + edge * height, battleX, battleY + edge * height);
-				SDL_RenderDrawLine(renderer, battleX, battleY, battleX, battleY + edge * height);
+				SDL_RenderDrawLine(renderer, int(battleX), int(battleY), int(battleX + edge * width), int(battleY));
+				SDL_RenderDrawLine(renderer, int(battleX + edge * width), int(battleY + edge * height), int(battleX + edge * width), int(battleY));
+				SDL_RenderDrawLine(renderer, int(battleX + edge * width), int(battleY + edge * height), int(battleX), int(battleY + edge * height));
+				SDL_RenderDrawLine(renderer, int(battleX), int(battleY), int(battleX), int(battleY + edge * height));
 			}
 			cow->render();
 			break;
@@ -1242,10 +1259,10 @@ void Game::render() {
 			enemyBar->render();
 			//render edge of battlefield
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-			SDL_RenderDrawLine(renderer, battleX, battleY, battleX + edge * width, battleY);
-			SDL_RenderDrawLine(renderer, battleX + edge * width, battleY + edge * height, battleX + edge * width, battleY);
-			SDL_RenderDrawLine(renderer, battleX + edge * width, battleY + edge * height, battleX, battleY + edge * height);
-			SDL_RenderDrawLine(renderer, battleX, battleY, battleX, battleY + edge * height);
+			SDL_RenderDrawLine(renderer, int(battleX), int(battleY), int(battleX + edge * width), int(battleY));
+			SDL_RenderDrawLine(renderer, int(battleX + edge * width), int(battleY + edge * height), int(battleX + edge * width), int(battleY));
+			SDL_RenderDrawLine(renderer, int(battleX + edge * width), int(battleY + edge * height), int(battleX), int(battleY + edge * height));
+			SDL_RenderDrawLine(renderer, int(battleX), int(battleY), int(battleX), int(battleY + edge * height));
 		}
 		if (cow->phase < 3 || !cutScene) {
 			sheep->bar->render();
@@ -1258,15 +1275,18 @@ void Game::render() {
 	for (auto h : hands) {
 		h->render();
 	}
-	if (paused) {
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 127);
-		SDL_RenderFillRect(renderer, blackScreen);
-		leaveButton->render();
-	}
 	for (std::vector<int> c : circles) {
 		drawCircle(c[0], c[1], c[2]);
 	}
 	circles.clear();
+	if (paused) {
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 127);
+		SDL_RenderFillRect(renderer, blackScreen);
+		leaveButton->render();
+		if (room.starts_with("Level")) {
+			resetButton->render();
+		}
+	}
 	SDL_RenderPresent(renderer);
 }
 
@@ -1276,11 +1296,19 @@ void Game::clean() {
 	for (auto m : music) {
 		Mix_FreeMusic(m);
 	}
-	for (auto o = GameObject::objects.begin(); o != GameObject::objects.end(); ) {
-		(*o)->clear();
-		//std::cout << GameObject::objects.size() << std::endl;
-		o = GameObject::objects.begin();
+	for (auto o : GameObject::objects) {
+		o->clear();
+		delete o;
 	}
+	GameObject::objects.clear();
+	for (auto b : Bar::bars) {
+		delete b;
+	}
+	Bar::bars.clear();
+	buttons->clear();
+	delete buttons;
+	delete currentButtons;
+	delete blackScreen;
 	TTF_Quit();
 	Mix_Quit();
 	IMG_Quit();
@@ -1449,8 +1477,7 @@ Hand* Game::createHand(uint16_t height, int health) {
 
 void Game::destroyHand(Hand* hand) {
 	delete hand->bar;
-	hand->clear();
-	delete hand;
+	hand->erase();
 }
 
 void Game::drawCircle(int x, int y, int radius)

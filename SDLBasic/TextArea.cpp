@@ -1,4 +1,8 @@
 #include "TextArea.h"
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 TextArea::TextArea(std::string text, std::string font, int size, SDL_Color fg, SDL_Color bg, Uint32 wrapLength, SDL_Renderer* renderer, uint16_t height):
 	GameObject(text, font, size, fg, bg, wrapLength, renderer, height) {

@@ -30,7 +30,7 @@ protected:
     Sheep* sheep;
     int16_t immunity = 0, immunityFrames = 300;
     TextArea* textArea;
-    std::string text;
+    std::string text = "0";
     int hits = 0;
 };
 

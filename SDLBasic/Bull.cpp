@@ -1,4 +1,8 @@
 #include "Bull.h"
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 Bull::Bull(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar) :
 	Enemy(spriteFile, renderer, height, health, sword, sheep, bar) {

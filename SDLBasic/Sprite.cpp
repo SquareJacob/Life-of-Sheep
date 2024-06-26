@@ -1,4 +1,8 @@
 #include "Sprite.h"
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 
 Sprite::Sprite(SDL_Surface* surface, SDL_Renderer* renderer) {

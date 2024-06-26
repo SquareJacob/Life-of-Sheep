@@ -1,4 +1,8 @@
 #include "Enemy.h"
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 Enemy::Enemy(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar) :
 	GameObject(spriteFile, renderer, height) {
@@ -7,7 +11,7 @@ Enemy::Enemy(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, in
 	this->sword = sword;
 	this->sheep = sheep;
 	if (bar == NULL) {
-		this->bar = new Bar(health, health, green, red, x, y, width, false, renderer);
+		this->bar = new Bar(health, health, green, red, int(x), int(y), width, false, renderer);
 	}
 	else {
 		this->bar = bar;
@@ -83,9 +87,11 @@ void Enemy::prepare() {
 	health = maxHealth;
 	bar->setMax(maxHealth);
 	bar->setValue(health);
+	damaged(0);
 	setKnockback(0.0, 0.0, 0.0);
 	hits = 0;
 	ticker = 0.0;
+	immunity = 0;
 }
 
 void Enemy::render() {
@@ -104,12 +110,11 @@ void Enemy::speak(std::string text) {
 }
 
 void Enemy::posBar() {
-	bar->updatePos(x - width / 2 - GameObject::globalX, y + height / 2 - GameObject::globalY);
+	bar->updatePos(int(x - width / 2 - GameObject::globalX), int(y + height / 2 - GameObject::globalY));
 }
 
 void Enemy::clear() {
 	GameObject::clear();
-	textArea->clear();
 	enemies.erase(std::find(enemies.begin(), enemies.end(), this));
 }
 

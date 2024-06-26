@@ -1,4 +1,8 @@
 #include "Dog.h"
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 Dog::Dog(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar) :
 	Enemy(spriteFile, renderer, height, health, sword, sheep, bar) {
@@ -39,7 +43,7 @@ void Dog::update(double frame) {
 			ticker += frame / 1000;
 		}
 		else { //run towards sheep
-			turnTowards(sheep, baseAngleSpeed * (3.0 - 2.0 * (float)health / (float)maxHealth) * frame);		
+			turnTowards(sheep, baseAngleSpeed * (2.0 - 1.0 * (float)health / (float)maxHealth) * frame);		
 			if (move(frame)) {
 				ticker = 0;
 			}

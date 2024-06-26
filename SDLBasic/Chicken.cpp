@@ -1,9 +1,13 @@
 #include "Chicken.h"
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 Chicken::Chicken(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar, double edge, SDL_Color fg, SDL_Color bg) :
 	Enemy(spriteFile, renderer, height, health, sword, sheep, bar) {
 	speed = (float)height / 1000.0;
-	chickHealth = health / 20;
+	chickHealth = health / 10;
 	chickCost = health / 40;
 	knock = 5.0;
 	Bar* chickBar;
@@ -11,7 +15,7 @@ Chicken::Chicken(const char* spriteFile, SDL_Renderer* renderer, uint16_t height
 		chickBar = new Bar(chickHealth, chickHealth, fg, bg, 0, 0, 100, false, renderer);
 		chicks.push_back(new Chick("assets/egg.png", renderer, height / 2, chickHealth, sword, sheep, chickBar));
 		chickBar->updateHeight(height / 4);
-		chickBar->updateLength(chicks[i]->width * 1.5);
+		chickBar->updateLength(int(chicks[i]->width * 1.5));
 		chicks[i]->setBounds(edge);
 	}
 }
@@ -22,15 +26,12 @@ bool Chicken::move(double vel) {
 
 void Chicken::update(double frame) {
 	if(health > chickCost){
-		//look away from sheep
-		lookAt(sheep);
-		angle += 180;
-		flip = 2 - flip;
-
-		//retreat, and teleport to center if at edge
+		aSpeed += aAccel * frame * cos(rand());
+		aSpeed *= 0.99;
+		angle += aSpeed * frame;
 		if (move(frame)) {
-			x = gameWidth / 2;
-			y = gameHeight / 2;
+			angle += 180;
+			flip = 2 - flip;
 		}
 		damage(5);
 		//prepare egg
@@ -82,6 +83,9 @@ void Chicken::prepare() {
 	y = gameHeight / 2;
 	ticker = 0.0;
 	eggReady = 0.0;
+	aSpeed = 0.0;
+	flip = 0;
+	angle = 0;
 	for (auto c : chicks) {
 		c->prepare();
 	}
