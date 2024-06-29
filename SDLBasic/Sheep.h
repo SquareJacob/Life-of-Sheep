@@ -30,7 +30,7 @@ public:
     int flightRecharge;
     bool flyable = false;
 private:
-    int flightRechargeTime, baseFlightRechargeTime = 5000;
+    int flightRechargeTime, baseFlightRechargeTime = 1000;
     double speed; //movespeed porpotion
     double aSpeed; //rotation speed porpotion
     int immunityFrames = 500; //ms of immunity

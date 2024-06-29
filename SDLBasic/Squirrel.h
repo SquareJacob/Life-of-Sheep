@@ -12,6 +12,7 @@ public:
     static uint8_t phase;
     bool running = false;
     double acornTime = 0.0;
+    double stage;
     class Acorn :
         public Enemy
     {

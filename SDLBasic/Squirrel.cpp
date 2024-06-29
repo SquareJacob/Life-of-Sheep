@@ -7,9 +7,12 @@
 Squirrel::Squirrel(const char* spriteFile, SDL_Renderer* renderer, uint16_t height, int health, Sword* sword, Sheep* sheep, Bar* bar) :
 	Enemy(spriteFile, renderer, height, health, sword, sheep, bar) {
 	speed = height / 50.0;
+	acorns.reserve(100);
+	stage = 0.0;
 }
 
 void Squirrel::update(double frame) {
+	stage = 1.0 - float(health) / float(maxHealth);
 	if (running) {
 		lookAt(sheep);
 		angle += 180;
@@ -26,17 +29,19 @@ void Squirrel::update(double frame) {
 	}
 	else {
 		if (hypot(x - sheep->x, y - sheep->y) < height * 4) {
-			ticker += frame / 750.0 / (2.0 - float(health) / float(maxHealth));
+			ticker += frame / 1000.0;
 		}
-		if (ticker < 16.0 * float(health) / float(maxHealth) + 4.0) {
+		if (ticker < 20.0 - 16.0 * stage) {
 			acornTime += frame / 1000.0;
-			angle += frame / 20.0;
-			Acorn* a = new Acorn("assets/acorn.png", sprite->renderer, height / 2, 1, sword, sheep, NULL, this, speed);
-			a->x = x;
-			a->y = y;
-			a->angle = angle;
-			acorns.push_back(a);
-			acornTime -= 0.5;
+			angle += frame / 50.0 * (1.0 + 4.0 * stage);
+			if (acornTime > 0) {
+				Acorn* a = new Acorn("assets/acorn.png", sprite->renderer, height / 2, 1, sword, sheep, NULL, this, speed);
+				a->x = x;
+				a->y = y;
+				a->angle = angle;
+				acorns.push_back(a);
+				acornTime -= 0.1;
+			}
 		}
 		else {
 			running = true;
