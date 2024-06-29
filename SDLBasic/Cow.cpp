@@ -111,7 +111,7 @@ void Cow::update(double frame) {
 	uint8_t size = int(bolts.size());
 	for (uint8_t i = 0; i < size; i++) {
 		if (bolts[i]->update(frame)) {
-			delete bolts[i]->bar;
+			bolts[i]->bar->erase();
 			bolts[i]->erase();
 			bolts.erase(bolts.begin() + i);
 			i--;
@@ -132,7 +132,7 @@ void Cow::render() {
 
 void Cow::boltsClear() {
 	for (auto b : bolts) {
-		b->clear();
+		b->erase();
 	}
 	bolts.clear();
 }

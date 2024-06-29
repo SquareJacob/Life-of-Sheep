@@ -64,6 +64,7 @@ void Wolf::update2(double frame) {
 		if (distToSheep() < stopChaseDistance) {
 			chasing = false;
 			realHits = hits;
+			ticker = 0.0;
 		}
 		return;
 	}
@@ -77,7 +78,13 @@ void Wolf::update2(double frame) {
 	}
 
 	turnTowards(sheep, aSpeed * (2.0 - 1.0 * (float)health / (float)maxHealth) * (float)(dead + 1) * frame);
-	move(frame * (float)(dead + 1));
+	ticker += frame / 1000.0;
+	if (ticker < 7.0) {
+		move(frame * (float)(dead + 1));
+	}
+	else if (ticker > 9.97) {
+		ticker = 0.0;
+	}
 	damage(15);
 	if (distToSheep() > chaseDistance) {
 		chasing = true;
@@ -98,24 +105,24 @@ void Wolf::update3(double frame) {
 	if (angle > 360.0) {
 		angle -= 360.0;
 	}
-	disX = sheep->x - x;
-	disY = sheep->y - y;
-	disSquared = disX * disX + disY * disY;
-	aMult = (2.0 - (float)health / (float)maxHealth) * (float)(dead + 1);
-	tAccel = frame * accel * aMult / pow(disSquared, 0.5);
-	velX += tAccel * disX;
-	velY += tAccel * disY;
+	ticker += frame / 1000.0;
+	if (ticker < 5.0) {
+		disX = sheep->x - x;
+		disY = sheep->y - y;
+		disSquared = disX * disX + disY * disY;
+		aMult = (2.0 - (float)health / (float)maxHealth) * (float)(dead + 1);
+		tAccel = frame * accel * aMult / pow(disSquared, 0.5);
+		velX += tAccel * disX;
+		velY += tAccel * disY;
+	}
+	else if (ticker > 6.91) {
+		ticker = 0.0;
+	}
 	knockback(frame);
 	damage(hypot(velX, velY) * 50.0 / aMult + 5);
 	x += frame * velX;
 	y += frame * velY;
-	//ticker += frame / 1000.0;
-	if (ticker > 5.0) {
-		ticker = 0.0;
-		velX = 0.0;
-		velY = 0.0;
-	}
-	if (distToSheep() > chaseDistance) {
+	if (distToSheep() > chaseDistance / (float)(dead + 1)) {
 		chasing = true;
 	}
 }

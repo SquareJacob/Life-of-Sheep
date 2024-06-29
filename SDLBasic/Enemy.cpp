@@ -116,6 +116,13 @@ void Enemy::posBar() {
 void Enemy::clear() {
 	GameObject::clear();
 	enemies.erase(std::find(enemies.begin(), enemies.end(), this));
+	textArea->clear();
+}
+
+void Enemy::erase() {
+	textArea->erase();
+	GameObject::erase();
+	enemies.erase(std::find(enemies.begin(), enemies.end(), this));
 }
 
 std::vector<Enemy*> Enemy::enemies;

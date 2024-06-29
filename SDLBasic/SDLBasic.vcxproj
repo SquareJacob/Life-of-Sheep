@@ -149,6 +149,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Sheep.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="Squirrel.cpp" />
     <ClCompile Include="Sword.cpp" />
     <ClCompile Include="TextArea.cpp" />
     <ClCompile Include="Wolf.cpp" />
@@ -168,11 +169,13 @@
     <ClInclude Include="Horse.h" />
     <ClInclude Include="Sheep.h" />
     <ClInclude Include="Sprite.h" />
+    <ClInclude Include="Squirrel.h" />
     <ClInclude Include="Sword.h" />
     <ClInclude Include="TextArea.h" />
     <ClInclude Include="Wolf.h" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="assets\acorn.png" />
     <Image Include="assets\bull.png" />
     <Image Include="assets\chick.png" />
     <Image Include="assets\chicken.png" />
@@ -186,6 +189,7 @@
     <Image Include="assets\horse.png" />
     <Image Include="assets\sheep1.png" />
     <Image Include="assets\sheep2.png" />
+    <Image Include="assets\squirrel.png" />
     <Image Include="assets\sword.png" />
     <Image Include="assets\wolf.png" />
   </ItemGroup>
@@ -199,6 +203,7 @@
     <None Include="assets\lets play KILL.ogg" />
     <None Include="assets\moo.ogg" />
     <None Include="assets\reaching out.ogg" />
+    <None Include="assets\With Love, From Montana.ogg" />
     <None Include="assets\YET TO BE FORGOTTEN.ogg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

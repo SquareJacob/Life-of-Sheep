@@ -20,6 +20,7 @@ public:
     void posBar();
     double ticker = 0;
     void clear();
+    void erase();
     Bar* bar;
     int health, maxHealth;
     static std::vector<Enemy*> enemies;

@@ -13,6 +13,7 @@ public:
     void updateHeight(Uint16 height);
     void updateLength(Uint16 length);
     void updatePos(int16_t x, int16_t y);
+    void erase();
     Uint16 getHeight();
     static std::vector<Bar*> bars;
 protected:

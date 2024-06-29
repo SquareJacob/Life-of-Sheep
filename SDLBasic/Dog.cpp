@@ -51,7 +51,7 @@ void Dog::update(double frame) {
 		}
 	}
 	else if (behavior == 1) {
-		lookAt(sheep);
+		turnTowards(sheep, baseAngleSpeed * (2.0 - 1.0 * (float)health / (float)maxHealth) * frame);
 		damage(1);
 		ticker += frame / 3000.0;
 		if (ticker > 1.0) {

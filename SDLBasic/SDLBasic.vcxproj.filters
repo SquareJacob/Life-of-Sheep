@@ -87,6 +87,9 @@
     <ClCompile Include="Wolf.cpp">
       <Filter>src\Enemies</Filter>
     </ClCompile>
+    <ClCompile Include="Squirrel.cpp">
+      <Filter>src\Enemies</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Enemy.h">
@@ -140,6 +143,9 @@
     <ClInclude Include="Wolf.h">
       <Filter>Header Files\Enemies</Filter>
     </ClInclude>
+    <ClInclude Include="Squirrel.h">
+      <Filter>Header Files\Enemies</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\sheep1.png">
@@ -187,6 +193,12 @@
     <Image Include="assets\wolf.png">
       <Filter>assets</Filter>
     </Image>
+    <Image Include="assets\squirrel.png">
+      <Filter>assets</Filter>
+    </Image>
+    <Image Include="assets\acorn.png">
+      <Filter>assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\A sheepish menu.ogg">
@@ -217,6 +229,9 @@
       <Filter>assets</Filter>
     </None>
     <None Include="assets\lets play KILL.ogg">
+      <Filter>assets</Filter>
+    </None>
+    <None Include="assets\With Love, From Montana.ogg">
       <Filter>assets</Filter>
     </None>
   </ItemGroup>

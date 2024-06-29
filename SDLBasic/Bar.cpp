@@ -87,4 +87,9 @@ Uint16 Bar::getHeight() {
 	return height;
 }
 
+void Bar::erase() {
+	bars.erase(std::find(bars.begin(), bars.end(), this));
+	delete this;
+}
+
 std::vector<Bar*> Bar::bars;

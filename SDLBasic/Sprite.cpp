@@ -86,7 +86,9 @@ void Sprite::place(int x, int y, int width, int height, double angle, uint8_t fl
 		f = SDL_FLIP_NONE;
 		break;
 	}
-	SDL_RenderCopyEx(renderer, texture, NULL, &desR, -angle, NULL, f);
+	if (SDL_RenderCopyEx(renderer, texture, NULL, &desR, -angle, NULL, f) != 0) {
+		std::cout << SDL_GetError() << std::endl;
+	}
 }
 
 float Sprite::getPorportion() {
