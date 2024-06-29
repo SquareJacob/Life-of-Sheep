@@ -17,6 +17,10 @@
 #include "Button.h"
 #include "Wolf.h" 
 #include "Squirrel.h"
+#define _CRTDBG_MAP_ALLOC
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#endif  
 
 Sheep* sheep;
 const int sheepBaseHealth = 300;

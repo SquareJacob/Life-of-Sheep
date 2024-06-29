@@ -23,6 +23,7 @@ int main(int argc, char* argv[]) {
 		game->update((frameTime > frameDelay) ? (frameTime > maxFrame ? maxFrame : frameTime) : frameDelay);
 		game->render();
 		frameTime = SDL_GetTicks() - frameStart;
+		std::cout << frameTime << std::endl;
 		if (frameDelay > frameTime) {
 			SDL_Delay(frameDelay - frameTime);
 		}
